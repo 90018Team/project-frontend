@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.R;
 import com.example.help.databinding.HomeFragmentBinding;
+
+import com.example.help.util.jsonUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
@@ -62,7 +69,13 @@ public class HomeFragment extends Fragment {
             }
 
         });
-        ////
+        ////c
+        try {
+            JSONObject object = new JSONObject(jsonUtil.getJSON(getContext(),"getData.json"));
+            Log.d("gaga", "onCreateView: " + object.getString("message"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
         return root;
