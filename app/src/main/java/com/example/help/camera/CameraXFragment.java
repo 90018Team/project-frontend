@@ -3,6 +3,7 @@ package com.example.help.camera;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -11,16 +12,24 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.help.R;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,6 +54,7 @@ public class CameraXFragment extends Fragment {
     // debug string
     private static final String TAG = "CameraXActivity";
     // permissions to check on launch
+    private final int REQUEST_CODE_PERMISSIONS = 101;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{
                     Manifest.permission.CAMERA,
@@ -65,16 +75,22 @@ public class CameraXFragment extends Fragment {
 
     // Executors - need executors to run separate to main thread
     // ScheduledExecutors for timelapse
+    private ExecutorService mImageCaptureExecutorService;
+
+    ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
 
     // sensors for orientation detection
     private SensorManager sensorManager;
     private Sensor sensor;
 
+    private PreviewView mPreviewViewFinder;
+    private ImageButton mCaptureImageButton;
+
     /**
      * Is a photo being taken in Emergency mode or manually? if is Alert
      * then use SurfaceTexture for preview else use normal preview view
      */
-    
+
 
 
     private Context safeContext;
@@ -116,6 +132,16 @@ public class CameraXFragment extends Fragment {
         safeContext = context;
     }
 
+    /**
+     * method to declare and bind the CameraX use cases
+     */
+    private void bindCameraUseCases() {
+
+    }
+
+    /*public void showToast(final String toast) {
+        runOnUiThread(() -> Toast.makeText(MainActivity.this, toast, Toast.LENGTH_LONG).show());
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -127,6 +153,21 @@ public class CameraXFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mCameraProviderFuture = ProcessCameraProvider.getInstance(safeContext);
+        mPreviewViewFinder = (PreviewView) view.findViewById(R.id.viewFinder);
+
+        mCaptureImageButton = (ImageButton) view.findViewById(R.id.imageCapture);
+
+        if(allPermissionsGranted()){
+            setupCamera(); //setup camera if permission has been granted by user
+
+            // set onclick listener to runnable take photo to capture image button
+            mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
+        } else{
+            ActivityCompat.requestPermissions((Activity) safeContext,
+                    REQUIRED_PERMISSIONS,
+                    REQUEST_CODE_PERMISSIONS);
+        }
 
 
     }
@@ -136,17 +177,26 @@ public class CameraXFragment extends Fragment {
      * Initialise the camera, the use cases and extensions (if any), set to preview/
      * surface texture and bind to lifecycle
      */
-    public void startCamera() {
+    public void setupCamera() {
 
     }
 
     /**
      * Method to take single still photo
      * May need to take params for which lens to use
+     *
+     * Currently modelled as an onclick listener for the image capture button with image capture use case
+     * "takePicture" runnable method contained herein
      */
-    public void takePhoto() {
 
-    }
+    private View.OnClickListener takePhotoOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // takePicture method of cameraX
+            // save image to file
+
+        }
+    };
 
     private boolean allPermissionsGranted(){
 
@@ -163,11 +213,23 @@ public class CameraXFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         if(allPermissionsGranted()){
-            startCamera();
+            setupCamera();
         } else{
             Toast.makeText(safeContext, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+   /* @RequiresPermission(Manifest.permission.CAMERA)
+    public boolean hasCameraWithLensFacing(@CameraSelector.LensFacing int lensFacing) {
+        String cameraId;
+        try {
+            cameraId = CameraX.getCameraWithLensFacing(lensFacing);
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to query lens facing.", e);
+        }
+
+        return cameraId != null;
+    }*/
 }
