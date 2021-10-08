@@ -5,6 +5,7 @@ package com.example.help.camera;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -13,13 +14,19 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.Preview;
+import androidx.camera.core.UseCase;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +36,14 @@ import android.widget.Toast;
 import com.example.help.R;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -78,6 +92,7 @@ public class CameraXFragment extends Fragment {
     private ExecutorService mImageCaptureExecutorService;
 
     ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
+    ProcessCameraProvider mCameraProvider;
 
     // sensors for orientation detection
     private SensorManager sensorManager;
@@ -85,6 +100,21 @@ public class CameraXFragment extends Fragment {
 
     private PreviewView mPreviewViewFinder;
     private ImageButton mCaptureImageButton;
+
+    // use cases
+    private ImageCapture mImageCapture;
+    private Preview mPreview;
+
+    private Camera mCamera;
+
+    private static final String FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS";
+    private static final String PHOTO_EXTENSION = ".jpg";
+    //private ContextWrapper cw = new ContextWrapper(getApplicationContext());
+
+    //private static final String PARENT_DIR = "";
+
+    private Locale mCurrentLocale = getResources().getConfiguration().locale;
+
 
     /**
      * Is a photo being taken in Emergency mode or manually? if is Alert
@@ -132,12 +162,7 @@ public class CameraXFragment extends Fragment {
         safeContext = context;
     }
 
-    /**
-     * method to declare and bind the CameraX use cases
-     */
-    private void bindCameraUseCases() {
 
-    }
 
     /*public void showToast(final String toast) {
         runOnUiThread(() -> Toast.makeText(MainActivity.this, toast, Toast.LENGTH_LONG).show());
@@ -178,7 +203,28 @@ public class CameraXFragment extends Fragment {
      * surface texture and bind to lifecycle
      */
     public void setupCamera() {
+        mCameraProviderFuture.addListener(() -> {
 
+            try {
+                // Camera provider is now guaranteed to be available
+                mCameraProvider = mCameraProviderFuture.get();
+
+                // which camera are we using? Front and/or Back?
+
+                // enable switching between Front & Back?
+
+                // bind use cases
+                // use list of use cases?
+                bindCameraUseCases();
+
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+        },ContextCompat.getMainExecutor(requireContext()));
     }
 
     /**
@@ -195,8 +241,55 @@ public class CameraXFragment extends Fragment {
             // takePicture method of cameraX
             // save image to file
 
+            // File to save
+
+
+            //mImageCapture.takePicture();
         }
     };
+
+    /**
+     * method to declare and bind the CameraX use cases
+     */
+    private void bindCameraUseCases() {
+
+        // preview
+        mPreview = new Preview.Builder().build();
+
+        // image capture
+        mImageCapture = new ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .build();
+
+        // camera using back selector bind to lifecycle
+        /**
+         * will ultimately be able to select back or front
+         */
+        mCamera = mCameraProvider.bindToLifecycle(
+                this,
+                BACK_SELECTOR,
+                mPreview,
+                mImageCapture);
+
+        // set surface provider
+        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
+    }
+
+    // helper method to return a Java file given the params
+    private File createFile(File baseFolder, String format, String extension) {
+        return new File(baseFolder, (new SimpleDateFormat(format, mCurrentLocale))
+                .format(System.currentTimeMillis()) + extension);
+    }
+
+    // get base folder for saving images?
+    private File getBaseFolder() {
+        ContextWrapper cw = new ContextWrapper(getActivity().getBaseContext());
+
+        //String fullPath = cw.getExternalFilesDir(Environment.DIRECTORY_DCIM).toString();
+        File baseFolder = cw.getExternalFilesDir(Environment.DIRECTORY_DCIM);
+
+        return baseFolder;
+    }
 
     private boolean allPermissionsGranted(){
 
