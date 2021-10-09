@@ -17,6 +17,7 @@ import androidx.annotation.RequiresPermission;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.core.UseCase;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -27,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,19 +56,19 @@ public class CameraXFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    //private static final String ARG_PARAM1 = "param1";
+    //private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    //private String mParam1;
+    //private String mParam2;
 
     /**
      *
      * Originally from CameraXActivity
      */
     // debug string
-    private static final String TAG = "CameraXActivity";
+    private static final String TAG = "CameraXFragment";
     // permissions to check on launch
     private final int REQUEST_CODE_PERMISSIONS = 101;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -89,7 +91,7 @@ public class CameraXFragment extends Fragment {
 
     // Executors - need executors to run separate to main thread
     // ScheduledExecutors for timelapse
-    private ExecutorService mImageCaptureExecutorService;
+    private ExecutorService mImageCaptureExecutorService = Executors.newFixedThreadPool(10);
 
     ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
     ProcessCameraProvider mCameraProvider;
@@ -113,7 +115,7 @@ public class CameraXFragment extends Fragment {
 
     //private static final String PARENT_DIR = "";
 
-    private Locale mCurrentLocale = getResources().getConfiguration().locale;
+    //private Locale mCurrentLocale = getResources().getConfiguration().locale;
 
 
     /**
@@ -133,27 +135,25 @@ public class CameraXFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment CameraXFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CameraXFragment newInstance(String param1, String param2) {
+    public static CameraXFragment newInstance() {
         CameraXFragment fragment = new CameraXFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        //Bundle args = new Bundle();
+        //args.putString(ARG_PARAM1, param1);
+        //args.putString(ARG_PARAM2, param2);
+        //fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        /*if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        }*/
     }
 
     @Override
@@ -164,9 +164,9 @@ public class CameraXFragment extends Fragment {
 
 
 
-    /*public void showToast(final String toast) {
-        runOnUiThread(() -> Toast.makeText(MainActivity.this, toast, Toast.LENGTH_LONG).show());
-    }*/
+    public void showToast(final String toast) {
+        getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -239,12 +239,34 @@ public class CameraXFragment extends Fragment {
         @Override
         public void onClick(View view) {
             // takePicture method of cameraX
-            // save image to file
 
-            // File to save
+            // get base directory
+            File directory = getBaseFolder();
+            // create a file
+            File file = createFile(directory, FILENAME, PHOTO_EXTENSION);
 
+            ImageCapture.OutputFileOptions outputFileOptions =
+                    new ImageCapture.OutputFileOptions.Builder(file).build();
 
-            //mImageCapture.takePicture();
+            // image capture takePicture method
+            mImageCapture.takePicture(outputFileOptions, mImageCaptureExecutorService, new ImageCapture.OnImageSavedCallback() {
+
+                @Override
+                public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                    String msg = "Pic captured at " + file.getAbsolutePath();
+                    //Toast.makeText(getBaseContext(), msg,Toast.LENGTH_LONG).show();
+                    showToast(msg);
+                    Log.d(TAG, msg);
+                }
+
+                @Override
+                public void onError(@NonNull ImageCaptureException exception) {
+                    String msg = "Pic capture failed : " + exception.getMessage().toString();
+                    //Toast.makeText(getBaseContext(), msg,Toast.LENGTH_LONG).show();
+                    showToast(msg);
+                    exception.printStackTrace();
+                }
+            });
         }
     };
 
@@ -265,19 +287,20 @@ public class CameraXFragment extends Fragment {
         /**
          * will ultimately be able to select back or front
          */
+        // set surface provider
+        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
+
         mCamera = mCameraProvider.bindToLifecycle(
                 this,
                 BACK_SELECTOR,
                 mPreview,
                 mImageCapture);
 
-        // set surface provider
-        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
     }
 
     // helper method to return a Java file given the params
     private File createFile(File baseFolder, String format, String extension) {
-        return new File(baseFolder, (new SimpleDateFormat(format, mCurrentLocale))
+        return new File(baseFolder, (new SimpleDateFormat(format, Locale.US))
                 .format(System.currentTimeMillis()) + extension);
     }
 
