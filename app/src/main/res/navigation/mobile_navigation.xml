@@ -19,11 +19,26 @@
         android:id="@+id/navigation_contacts"
         android:name="com.example.help.ui.contact.ContactFragment"
         android:label="@string/title_contacts"
-        tools:layout="@layout/contact_fragment" />
+        tools:layout="@layout/contact_fragment" >
+        <action
+            android:id="@+id/action_add_contact"
+            app:destination="@+id/addContactFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_setting"
         android:name="com.example.help.ui.setting.SettingFragment"
         android:label="@string/title_setting"
         tools:layout="@layout/setting_fragment" />
+    <fragment
+        android:id="@+id/addContactFragment"
+        android:name="com.example.help.ui.contact.AddContactFragment"
+        android:label="add_contact"
+        tools:layout="@layout/add_contact" >
+        <action
+            android:id="@+id/action_back_to_contacts"
+            app:destination="@id/navigation_contacts" />
+    </fragment>
 </navigation>
