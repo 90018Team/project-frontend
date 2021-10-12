@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,8 +23,7 @@ import java.util.List;
 public class SignInActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
-            result -> onSignInResult(result)
-    );
+            result -> onSignInResult(result));
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,27 +32,24 @@ public class SignInActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Log.d("SignInActivity", "onCreate: no user logged in ");
             executeSignInAction();
-            Intent signInIntent=executeSignInAction();
-            signInLauncher.launch(signInIntent);
         } else {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         }
     }
     @Override
     protected void onStart() {
         super.onStart();
-
         // If there is no signed in user, launch FirebaseUI
         // Otherwise head to MainActivity
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Log.d("SignInActivity", "onStart: no user logged in ");
-            Intent signInIntent=executeSignInAction();
-            signInLauncher.launch(signInIntent);
+            executeSignInAction();
         } else {
             startActivity(new Intent(this, MainActivity.class));
         }
     }
-    private Intent executeSignInAction(){
+    private void executeSignInAction(){
         // Choose authentication providers
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build(),
@@ -65,9 +62,10 @@ public class SignInActivity extends AppCompatActivity {
                 .setAvailableProviders(providers)
                 .setIsSmartLockEnabled(false)
                 .build();
-        return signInIntent;
+        signInLauncher.launch(signInIntent);
     }
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
+        Log.d("SignInActivity.java", "onSignInResult: fired!");
         IdpResponse response = result.getIdpResponse();
         Log.d("SignInActivity", "onSignInResult: Responded "+result.getResultCode());
         if (result.getResultCode() == RESULT_OK) {
@@ -77,6 +75,7 @@ public class SignInActivity extends AppCompatActivity {
             String displayName = user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
             Log.d("SignInActivity.java","onSignInResult: "+"sign in succeed, as user: "+displayName);
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         } else if(result.getResultCode()==null){
             Log.d("SignInActivity.java", "onSignInResult: "+"sign in cancelled");
         }
