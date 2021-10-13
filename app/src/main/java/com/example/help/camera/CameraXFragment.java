@@ -11,6 +11,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
@@ -42,6 +44,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -129,6 +132,7 @@ public class CameraXFragment extends Fragment {
 
     public CameraXFragment() {
         // Required empty public constructor
+        super(R.layout.fragment_camera_x);
     }
 
     /**
@@ -144,8 +148,13 @@ public class CameraXFragment extends Fragment {
         //args.putString(ARG_PARAM1, param1);
         //args.putString(ARG_PARAM2, param2);
         //fragment.setArguments(args);
+
+        Log.d(TAG, "Fragment New Instance launched");
+
         return fragment;
     }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -154,6 +163,8 @@ public class CameraXFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }*/
+
+        setupPermissions();
     }
 
     @Override
@@ -172,18 +183,29 @@ public class CameraXFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_camera_x, container, false);
+
+
+
+        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_camera_x, container, false);
+        mPreviewViewFinder = (PreviewView) root.findViewById(R.id.viewFinder);
+        mCaptureImageButton = (ImageButton) root.findViewById(R.id.imageCapture);
+
+        Log.d(TAG, "on create view complete");
+        return root;
+
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        //newInstance();
         mCameraProviderFuture = ProcessCameraProvider.getInstance(safeContext);
-        mPreviewViewFinder = (PreviewView) view.findViewById(R.id.viewFinder);
+        setupCamera(); //setup camera if permission has been granted by user
 
-        mCaptureImageButton = (ImageButton) view.findViewById(R.id.imageCapture);
+        // set onclick listener to runnable take photo to capture image button
+        mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
 
-        if(allPermissionsGranted()){
+        /*if(allPermissionsGranted()){
             setupCamera(); //setup camera if permission has been granted by user
 
             // set onclick listener to runnable take photo to capture image button
@@ -192,7 +214,7 @@ public class CameraXFragment extends Fragment {
             ActivityCompat.requestPermissions((Activity) safeContext,
                     REQUIRED_PERMISSIONS,
                     REQUEST_CODE_PERMISSIONS);
-        }
+        }*/
 
 
     }
@@ -223,7 +245,7 @@ public class CameraXFragment extends Fragment {
                 e.printStackTrace();
             }
 
-
+            Log.d(TAG, "setup camera complete");
         },ContextCompat.getMainExecutor(requireContext()));
     }
 
@@ -277,7 +299,8 @@ public class CameraXFragment extends Fragment {
 
         // preview
         mPreview = new Preview.Builder().build();
-
+        // set surface provider
+        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
         // image capture
         mImageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
@@ -287,15 +310,14 @@ public class CameraXFragment extends Fragment {
         /**
          * will ultimately be able to select back or front
          */
-        // set surface provider
-        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
+
 
         mCamera = mCameraProvider.bindToLifecycle(
                 this,
                 BACK_SELECTOR,
                 mPreview,
                 mImageCapture);
-
+        Log.d(TAG, "Binding use cases complete");
     }
 
     // helper method to return a Java file given the params
@@ -314,7 +336,7 @@ public class CameraXFragment extends Fragment {
         return baseFolder;
     }
 
-    private boolean allPermissionsGranted(){
+    /*private boolean allPermissionsGranted(){
 
         for(String permission : REQUIRED_PERMISSIONS){
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(safeContext, permission)) {
@@ -323,9 +345,49 @@ public class CameraXFragment extends Fragment {
             return false;
         }
         return true;
+    }*/
+    /**
+     * Request permission if missing.
+     */
+    private void setupPermissions() {
+        if (isPermissionMissing()) {
+            ActivityResultLauncher<String[]> permissionLauncher =
+                    registerForActivityResult(
+                            new ActivityResultContracts.RequestMultiplePermissions(),
+                            result -> {
+                                for (String permission : REQUIRED_PERMISSIONS) {
+                                    if (!Objects.requireNonNull(result.get(permission))) {
+                                        Toast.makeText(getActivity().getApplicationContext(),
+                                                "Camera permission denied.",
+                                                Toast.LENGTH_SHORT)
+                                                .show();
+                                        getActivity().finish();
+                                        return;
+                                    }
+                                }
+                                return;
+                                //tryBindUseCases();
+                            });
+
+            permissionLauncher.launch(REQUIRED_PERMISSIONS);
+        } else {
+            // Permissions already granted. Start camera.
+            return;
+            //tryBindUseCases();
+        }
     }
 
-    @Override
+    /** Returns true if any of the required permissions is missing. */
+    private boolean isPermissionMissing() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(getActivity().getBaseContext(), permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         if(allPermissionsGranted()){
@@ -335,7 +397,7 @@ public class CameraXFragment extends Fragment {
             getActivity().finish();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
+    }*/
 
    /* @RequiresPermission(Manifest.permission.CAMERA)
     public boolean hasCameraWithLensFacing(@CameraSelector.LensFacing int lensFacing) {
