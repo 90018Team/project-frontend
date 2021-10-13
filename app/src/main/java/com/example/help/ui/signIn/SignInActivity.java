@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.help.MainActivity;
-import com.example.help.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
-import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,12 +18,26 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SignInActivity extends AppCompatActivity {
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
-            result -> onSignInResult(result));
+            this::onSignInResult);
+
+    private final FirebaseAuth.AuthStateListener mAuthListener = firebaseAuth -> {
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            Log.d("SigninActivity", "on Listener: a user signed in, back to main act");
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        } else {
+            executeSignInAction();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        auth.addAuthStateListener(mAuthListener);
         // If there is no signed in user, launch FirebaseUI
         // Otherwise head to MainActivity
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -37,9 +48,18 @@ public class SignInActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("SignInActivity", "onRestart: called ");
+
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
+        auth.addAuthStateListener(mAuthListener);
         // If there is no signed in user, launch FirebaseUI
         // Otherwise head to MainActivity
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -47,6 +67,7 @@ public class SignInActivity extends AppCompatActivity {
             executeSignInAction();
         } else {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         }
     }
     private void executeSignInAction(){
@@ -66,7 +87,7 @@ public class SignInActivity extends AppCompatActivity {
     }
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         Log.d("SignInActivity.java", "onSignInResult: fired!");
-        IdpResponse response = result.getIdpResponse();
+//        IdpResponse response = result.getIdpResponse();
         Log.d("SignInActivity", "onSignInResult: Responded "+result.getResultCode());
         if (result.getResultCode() == RESULT_OK) {
             Log.d("SignInActivity", "onSignInResult: Responded ok");
@@ -76,10 +97,8 @@ public class SignInActivity extends AppCompatActivity {
             Log.d("SignInActivity.java","onSignInResult: "+"sign in succeed, as user: "+displayName);
             startActivity(new Intent(this, MainActivity.class));
             finish();
-        } else if(result.getResultCode()==null){
-            Log.d("SignInActivity.java", "onSignInResult: "+"sign in cancelled");
-        }
-        else{
+        } else {
+//            result.getResultCode();
             // Sign in failed. If response is null the user canceled the
             // sign-in flow using the back button. Otherwise check
             // response.getError().getErrorCode() and handle the error.

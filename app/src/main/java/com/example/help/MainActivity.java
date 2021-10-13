@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Main activity", "onCreate: "+"user not signed in");
             startActivity(new Intent(this,SignInActivity.class));
             finish();
-            return;
         }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -70,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         if(isCurrentUserSignedIn()){
+            Log.d("Main activity", "onCreate: "+"user has signed in");
             reload();
         }
         else{
@@ -77,17 +77,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Main activity", "onCreate: "+"user not signed in");
             startActivity(new Intent(this,SignInActivity.class));
             finish();
-            return;
         }
     }
 
     public boolean isCurrentUserSignedIn() {
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return user != null;
     }
 
 
