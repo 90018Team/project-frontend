@@ -3,6 +3,7 @@ package com.example.help.camera;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -17,7 +18,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.camera.core.Camera;
+import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
@@ -82,11 +85,9 @@ public class CameraXFragment extends Fragment {
             };
 
     // Camera Selectors for front and rear available
-    static final CameraSelector BACK_SELECTOR =
-            new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
-    static final CameraSelector FRONT_SELECTOR =
-            new CameraSelector.Builder().requireLensFacing(
-                    CameraSelector.LENS_FACING_FRONT).build();
+    // Default starting assume back camera
+    private int mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+
 
     // isAlert bool will ultimately receive this flag from outside this class
     private static final boolean ALERT_ACTIVATED = false;
@@ -163,7 +164,7 @@ public class CameraXFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }*/
-
+        // ask for permissions NOW!
         setupPermissions();
     }
 
@@ -183,9 +184,6 @@ public class CameraXFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-
-
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_camera_x, container, false);
         mPreviewViewFinder = (PreviewView) root.findViewById(R.id.viewFinder);
         mCaptureImageButton = (ImageButton) root.findViewById(R.id.imageCapture);
@@ -205,18 +203,6 @@ public class CameraXFragment extends Fragment {
         // set onclick listener to runnable take photo to capture image button
         mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
 
-        /*if(allPermissionsGranted()){
-            setupCamera(); //setup camera if permission has been granted by user
-
-            // set onclick listener to runnable take photo to capture image button
-            mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
-        } else{
-            ActivityCompat.requestPermissions((Activity) safeContext,
-                    REQUIRED_PERMISSIONS,
-                    REQUEST_CODE_PERMISSIONS);
-        }*/
-
-
     }
 
 
@@ -224,6 +210,7 @@ public class CameraXFragment extends Fragment {
      * Initialise the camera, the use cases and extensions (if any), set to preview/
      * surface texture and bind to lifecycle
      */
+
     public void setupCamera() {
         mCameraProviderFuture.addListener(() -> {
 
@@ -231,7 +218,22 @@ public class CameraXFragment extends Fragment {
                 // Camera provider is now guaranteed to be available
                 mCameraProvider = mCameraProviderFuture.get();
 
-                // which camera are we using? Front and/or Back?
+                /**
+                 * check if front and/or back cameras exist,
+                 * automatically choose back if available
+                 */
+                try {
+                    if (hasBackCamera()) {
+                        // already default
+                        mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+                    }
+                    else if (hasFrontCamera()) {
+                        mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+                    }
+                    else { throw new IllegalStateException("No Camera Available"); }
+                } catch (CameraInfoUnavailableException e) {
+                    e.printStackTrace();
+                }
 
                 // enable switching between Front & Back?
 
@@ -311,10 +313,12 @@ public class CameraXFragment extends Fragment {
          * will ultimately be able to select back or front
          */
 
+        CameraSelector cameraSelector =
+                new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
 
         mCamera = mCameraProvider.bindToLifecycle(
                 this,
-                BACK_SELECTOR,
+                cameraSelector,
                 mPreview,
                 mImageCapture);
         Log.d(TAG, "Binding use cases complete");
@@ -336,16 +340,6 @@ public class CameraXFragment extends Fragment {
         return baseFolder;
     }
 
-    /*private boolean allPermissionsGranted(){
-
-        for(String permission : REQUIRED_PERMISSIONS){
-            if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(safeContext, permission)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }*/
     /**
      * Request permission if missing.
      */
@@ -362,9 +356,10 @@ public class CameraXFragment extends Fragment {
                                                 Toast.LENGTH_SHORT)
                                                 .show();
                                         getActivity().finish();
-                                        return;
+                                        //return;
                                     }
                                 }
+                                // permissions granted here - return flow success
                                 return;
                                 //tryBindUseCases();
                             });
@@ -387,27 +382,19 @@ public class CameraXFragment extends Fragment {
         }
         return false;
     }
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if(allPermissionsGranted()){
-            setupCamera();
-        } else{
-            Toast.makeText(safeContext, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
-            getActivity().finish();
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }*/
+    /**
+     * Methods to determine if front and back facing cameras exist. Return true if they exist,
+     * false otherwise
+     */
+    /** Front camera */
+    private boolean hasFrontCamera() throws CameraInfoUnavailableException {
+        return mCameraProvider != null && mCameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA);
+    }
+    /** Back camera */
+    private boolean hasBackCamera() throws CameraInfoUnavailableException {
+        return mCameraProvider != null && mCameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
+    }
 
-   /* @RequiresPermission(Manifest.permission.CAMERA)
-    public boolean hasCameraWithLensFacing(@CameraSelector.LensFacing int lensFacing) {
-        String cameraId;
-        try {
-            cameraId = CameraX.getCameraWithLensFacing(lensFacing);
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to query lens facing.", e);
-        }
 
-        return cameraId != null;
-    }*/
 }
