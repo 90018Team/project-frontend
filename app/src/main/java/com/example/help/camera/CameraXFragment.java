@@ -2,6 +2,8 @@ package com.example.help.camera;
 
 
 
+import static android.content.Context.SENSOR_SERVICE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -9,6 +11,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
@@ -58,7 +62,7 @@ import java.util.concurrent.Executors;
  * Use the {@link CameraXFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CameraXFragment extends Fragment {
+public class CameraXFragment extends Fragment /**implements SensorEventListener*/ {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -75,6 +79,13 @@ public class CameraXFragment extends Fragment {
      */
     // debug string
     private static final String TAG = "CameraXFragment";
+
+    /**
+     * to detect if camera is up or down
+     */
+    private Sensor mRotationOrientationSensor;
+    private SensorManager mSensorManager;
+
     // permissions to check on launch
     private final int REQUEST_CODE_PERMISSIONS = 101;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -101,8 +112,8 @@ public class CameraXFragment extends Fragment {
     ProcessCameraProvider mCameraProvider;
 
     // sensors for orientation detection
-    private SensorManager sensorManager;
-    private Sensor sensor;
+    //private SensorManager mSensorManager;
+    //private Sensor mRotationOrientationSensor;
 
     private PreviewView mPreviewViewFinder;
     private ImageButton mCaptureImageButton;
@@ -134,6 +145,9 @@ public class CameraXFragment extends Fragment {
     public CameraXFragment() {
         // Required empty public constructor
         super(R.layout.fragment_camera_x);
+        //mSensorManager = (SensorManager) getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
+        //mRotationOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
     }
 
     /**
@@ -143,7 +157,7 @@ public class CameraXFragment extends Fragment {
      * @return A new instance of fragment CameraXFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CameraXFragment newInstance() {
+    public CameraXFragment newInstance() {
         CameraXFragment fragment = new CameraXFragment();
         //Bundle args = new Bundle();
         //args.putString(ARG_PARAM1, param1);
@@ -166,6 +180,10 @@ public class CameraXFragment extends Fragment {
         }*/
         // ask for permissions NOW!
         setupPermissions();
+        // I don't know if this should go here, in example it goes in 'onResume()'
+        mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
+        mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
     }
 
     @Override
@@ -196,12 +214,15 @@ public class CameraXFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
         //newInstance();
         mCameraProviderFuture = ProcessCameraProvider.getInstance(safeContext);
         setupCamera(); //setup camera if permission has been granted by user
 
         // set onclick listener to runnable take photo to capture image button
         mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
+
 
     }
 
@@ -293,6 +314,14 @@ public class CameraXFragment extends Fragment {
             });
         }
     };
+
+    /**
+     * Method to switch between back & front + vice/versa camera source to view
+     * and image capture
+     */
+    private void switchCamera() {
+
+    }
 
     /**
      * method to declare and bind the CameraX use cases
@@ -396,5 +425,43 @@ public class CameraXFragment extends Fragment {
         return mCameraProvider != null && mCameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
     }
 
+    /**
+     * Sensor Event listener to determine whether device (when unattended) is laying face up or face down
+     * in order to support decision to select back or front camera to take auto photo
+     */
+    private final SensorEventListener mRotationalSensorEventListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            // acquire measurements, determine is up / down
+
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+
+        // assume if not up, is down?
+        private boolean isFacingUp() {
+
+            return false;
+        }
+
+
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(mRotationalSensorEventListener,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onPause() {
+        mSensorManager.unregisterListener(mRotationalSensorEventListener);
+        super.onPause();
+    }
 
 }
