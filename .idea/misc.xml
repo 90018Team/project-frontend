@@ -21,6 +21,7 @@
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/layout/add_contact.xml" value="0.24322916666666666" />
+        <entry key="app/src/main/res/layout/add_contact_from_phone.xml" value="0.16927083333333334" />
         <entry key="app/src/main/res/layout/alert_fragment.xml" value="0.24322916666666666" />
         <entry key="app/src/main/res/layout/contact_fragment.xml" value="0.22314814814814815" />
         <entry key="app/src/main/res/layout/contact_row.xml" value="0.466291917533946" />
@@ -28,6 +29,7 @@
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/layout/home_fragment.xml" value="0.25104166666666666" />
+        <entry key="app/src/main/res/layout/phone_contact_row.xml" value="1.2146863759443136" />
         <entry key="app/src/main/res/layout/setting_fragment.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1390625" />
       </map>

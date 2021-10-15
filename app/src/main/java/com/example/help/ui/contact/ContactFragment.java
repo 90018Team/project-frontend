@@ -61,7 +61,7 @@ public class ContactFragment extends Fragment {
 
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Navigation.findNavController(v).navigate(R.id.action_add_contact);
+                Navigation.findNavController(v).navigate(R.id.action_contacts_to_add_contact_from_phone);
             }
         });
 
