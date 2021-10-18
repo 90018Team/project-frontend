@@ -37,6 +37,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.os.Environment;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,7 +132,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     //private static final String PARENT_DIR = "";
 
     //private Locale mCurrentLocale = getResources().getConfiguration().locale;
-
+    private boolean isFaceUp = false;
 
     /**
      * Is a photo being taken in Emergency mode or manually? if is Alert
@@ -430,10 +431,17 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
      * in order to support decision to select back or front camera to take auto photo
      */
     private final SensorEventListener mRotationalSensorEventListener = new SensorEventListener() {
+
+        /**
+        * Method adapted from Professional Android Sensor Programming - Milette & Stroud 2012
+         */
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             // acquire measurements, determine is up / down
-
+            float[] rotationMatrix = new float[16];
+            SensorManager.getRotationMatrixFromVector(rotationMatrix,
+                    sensorEvent.values);
+            determineOrientation(rotationMatrix);
         }
 
         @Override
@@ -441,12 +449,49 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
         }
 
-        // assume if not up, is down?
-        private boolean isFacingUp() {
 
-            return false;
+        /**
+         *
+         */
+        private void onFaceUp() {
+            if (!isFaceUp) {
+                String msg = "Device is face up";
+                showToast(msg);
+                isFaceUp = true;
+            }
         }
 
+        private void onFaceDown() {
+            if (isFaceUp) {
+                String msg = "Device is face down";
+                showToast(msg);
+                isFaceUp = false;
+            }
+        }
+        /**
+         * Method adapted from Professional Android Sensor Programming - Milette & Stroud 2012
+         *
+         * @param rotationMatrix The rotation matrix to use if the orientation
+         * calculation
+         */
+        private void determineOrientation(float[] rotationMatrix) {
+            float[] orientationValues = new float[3];
+            SensorManager.getOrientation(rotationMatrix, orientationValues);
+
+            // pitch & roll x & y angles determine whether device is flattish
+            // values determine whether face up or down
+            double pitch = Math.toDegrees(orientationValues[1]);
+            double roll = Math.toDegrees(orientationValues[2]);
+
+            if (pitch <= 10) {
+                if (Math.abs(roll) >= 170) {
+                    onFaceDown();
+                }
+                else if (Math.abs(roll) <= 10) {
+                    onFaceUp();
+                }
+            }
+        }
 
     };
 
