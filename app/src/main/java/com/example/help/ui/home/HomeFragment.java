@@ -1,7 +1,13 @@
 package com.example.help.ui.home;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -13,14 +19,18 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
 
 import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.R;
 import com.example.help.databinding.HomeFragmentBinding;
 
+import com.example.help.ui.gps.location1;
 import com.example.help.util.jsonUtil;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,10 +42,13 @@ public class HomeFragment extends Fragment {
 
     private View frameLayout1;
     private ImageView imageView2;
-    private Handler mHandler=new Handler();
+    private Handler mHandler = new Handler();
     private ViewGroup.LayoutParams params;
     private int mHeight;
     private boolean isClick;
+    private double latitude = 0.0;
+    private double longitude = 0.0;
+    private LocationManager locationManager;
 
     @SuppressLint("ClickableViewAccessibility")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,11 +66,11 @@ public class HomeFragment extends Fragment {
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        isClick=true;
+                        isClick = true;
                         startplay();
                         break;
                     case MotionEvent.ACTION_UP:
-                        isClick=false;
+                        isClick = false;
                         endplay();
                         break;
 
@@ -71,7 +84,7 @@ public class HomeFragment extends Fragment {
         });
         ////c
         try {
-            JSONObject object = new JSONObject(jsonUtil.getJSON(getContext(),"getData.json"));
+            JSONObject object = new JSONObject(jsonUtil.getJSON(getContext(), "getData.json"));
             Log.d("gaga", "onCreateView: " + object.getString("message"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -83,7 +96,7 @@ public class HomeFragment extends Fragment {
 
     private void endplay() {
 
-        params.height=mHeight;
+        params.height = mHeight;
         frameLayout1.setLayoutParams(params);
     }
 
@@ -93,11 +106,13 @@ public class HomeFragment extends Fragment {
             @Override
             public void run() {
                 if (isClick) {
-                    params.height+=10;
-                    if (params.height>=imageView2.getHeight()) {
-                        params.height=imageView2.getHeight();
-                        Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getContext(), ChatActivity.class));
+                    params.height += 10;
+                    if (params.height >= imageView2.getHeight()) {
+                        params.height = imageView2.getHeight();
+                        //Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(getContext(), location1.class));
+                        //startActivity(new Intent(getContext(), ChatActivity.class));
+
                     }else{
                         mHandler.postDelayed(this, 5);
                     }
