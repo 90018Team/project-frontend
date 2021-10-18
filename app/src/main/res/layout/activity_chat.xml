@@ -3,6 +3,7 @@
     android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/chat_top"
         android:layout_alignParentTop="true"
@@ -26,17 +27,22 @@
             android:shadowRadius="5"
             />
 
+
     </LinearLayout>
 
-
-    <LinearLayout
-        android:id="@+id/sent_messages"
+<!--TODO: TO BE DELETED-->
+<!--    <LinearLayout-->
+<!--        android:id="@+id/sent_messages"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="horizontal">-->
+<!-- -->
+<!--    </LinearLayout>-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messages_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-
-    </LinearLayout>
+        android:layout_height="match_parent">
+    </androidx.recyclerview.widget.RecyclerView>
 
     <LinearLayout
         android:layout_width="match_parent"
