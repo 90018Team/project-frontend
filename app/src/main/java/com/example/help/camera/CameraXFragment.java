@@ -118,6 +118,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
     private PreviewView mPreviewViewFinder;
     private ImageButton mCaptureImageButton;
+    private ImageButton mSwitchCameraButton;
 
     // use cases
     private ImageCapture mImageCapture;
@@ -205,7 +206,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         // Inflate the layout for this fragment
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_camera_x, container, false);
         mPreviewViewFinder = (PreviewView) root.findViewById(R.id.viewFinder);
-        mCaptureImageButton = (ImageButton) root.findViewById(R.id.imageCapture);
+        mCaptureImageButton = (ImageButton) root.findViewById(R.id.image_capture_button);
+        mSwitchCameraButton = (ImageButton) root.findViewById(R.id.switch_camera_button);
 
         Log.d(TAG, "on create view complete");
         return root;
@@ -224,7 +226,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         // set onclick listener to runnable take photo to capture image button
         mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
 
-
+        // set onclick listener to runnable to switch lens
+        mSwitchCameraButton.setOnClickListener(switchCameraOnClickListener);
     }
 
 
@@ -320,8 +323,27 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
      * Method to switch between back & front + vice/versa camera source to view
      * and image capture
      */
-    private void switchCamera() {
+    private View.OnClickListener switchCameraOnClickListener = new View.OnClickListener() {
 
+        @Override
+        public void onClick(View view) {
+            switchCamera();
+        }
+    };
+
+    // method to actually switch the camera
+    private void switchCamera() {
+        // first unbind camera
+        mCameraProvider.unbindAll();
+
+        // rebind with new CameraSelector
+        if (mLensFacingChoice == CameraSelector.LENS_FACING_BACK) {
+            mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+        } else {
+            mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+        }
+        // rebind use cases
+        bindCameraUseCases();
     }
 
     /**
@@ -449,9 +471,9 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
         }
 
-
         /**
-         *
+         * Methods to set member variable isFaceUp for use in auto select front/back camera
+         * in Auto Alert Image Capture event
          */
         private void onFaceUp() {
             if (!isFaceUp) {
@@ -495,6 +517,9 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
     };
 
+    /**
+     * Required methods to register and unregister sensor event listener
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -502,7 +527,6 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
-
     @Override
     public void onPause() {
         mSensorManager.unregisterListener(mRotationalSensorEventListener);

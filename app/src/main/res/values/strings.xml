@@ -20,4 +20,7 @@
     <string name="app_setting">App settings</string>
     <string name="default_message_title">Default message</string>
 
+    <string name="capture_button_alt">Capture</string>
+    <string name="switch_camera_button_alt">Switch camera</string>
+    <string name="gallery_button_alt">Gallery</string>
 </resources>

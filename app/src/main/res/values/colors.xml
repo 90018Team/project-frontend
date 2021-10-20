@@ -8,4 +8,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name='grey_light'>#f0f0f5</color>
     <color name='grey_dark'>#e1e1ea</color>
+    // camera buttons
+    <color name="icActive">#FFFFFFFF</color>
+    <color name="icFocused">#DDFFFFFF</color>
+    <color name="icPressed">#AAFFFFFF</color>
 </resources>
