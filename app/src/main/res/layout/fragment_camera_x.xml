@@ -12,7 +12,8 @@
         android:layout_height="match_parent"/>
 
     <!-- Refined UI with some icons and UI style from Google's
-    CameraX example app 'CameraXBasic'   -->
+    CameraX example app 'CameraXBasic'
+    https://developer.android.com/guide/topics/media/camera  -->
     <ImageButton
         android:id="@+id/switch_camera_button"
         android:layout_width="@dimen/round_button_medium"

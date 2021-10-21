@@ -1,12 +1,9 @@
 package com.example.help.camera;
 
 
-
 import static android.content.Context.SENSOR_SERVICE;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
@@ -15,29 +12,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraInfoUnavailableException;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.CameraX;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.Preview;
-import androidx.camera.core.UseCase;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LifecycleOwner;
-
 import android.os.Environment;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,16 +20,31 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraInfoUnavailableException;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.Preview;
+
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
 import com.example.help.R;
+import com.example.help.databinding.FragmentCameraXBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -65,14 +55,6 @@ import java.util.concurrent.Executors;
  */
 public class CameraXFragment extends Fragment /**implements SensorEventListener*/ {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    //private static final String ARG_PARAM1 = "param1";
-    //private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    //private String mParam1;
-    //private String mParam2;
 
     /**
      *
@@ -101,20 +83,12 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     private int mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
 
 
-    // isAlert bool will ultimately receive this flag from outside this class
-    private static final boolean ALERT_ACTIVATED = false;
-    static boolean isAlert = ALERT_ACTIVATED;
-
     // Executors - need executors to run separate to main thread
     // ScheduledExecutors for timelapse
     private ExecutorService mImageCaptureExecutorService = Executors.newFixedThreadPool(10);
 
     ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
     ProcessCameraProvider mCameraProvider;
-
-    // sensors for orientation detection
-    //private SensorManager mSensorManager;
-    //private Sensor mRotationOrientationSensor;
 
     private PreviewView mPreviewViewFinder;
     private ImageButton mCaptureImageButton;
@@ -128,28 +102,29 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
     private static final String FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS";
     private static final String PHOTO_EXTENSION = ".jpg";
-    //private ContextWrapper cw = new ContextWrapper(getApplicationContext());
 
-    //private static final String PARENT_DIR = "";
-
-    //private Locale mCurrentLocale = getResources().getConfiguration().locale;
     private boolean isFaceUp = false;
+
 
     /**
      * Is a photo being taken in Emergency mode or manually? if is Alert
      * then use SurfaceTexture for preview else use normal preview view
+     *
+     * Need to get value from Main Activity or Alert activity
      */
+    // isAlert bool will ultimately receive this flag from outside this class
+    private static final boolean ALERT_ACTIVATED = false;
+    static boolean isAlert = ALERT_ACTIVATED;
 
 
+    // View Binding
+    private FragmentCameraXBinding fragmentCameraXBinding;
 
     private Context safeContext;
 
     public CameraXFragment() {
         // Required empty public constructor
         super(R.layout.fragment_camera_x);
-        //mSensorManager = (SensorManager) getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
-        //mRotationOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-
     }
 
     /**
@@ -161,25 +136,16 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     // TODO: Rename and change types and number of parameters
     public CameraXFragment newInstance() {
         CameraXFragment fragment = new CameraXFragment();
-        //Bundle args = new Bundle();
-        //args.putString(ARG_PARAM1, param1);
-        //args.putString(ARG_PARAM2, param2);
-        //fragment.setArguments(args);
 
         Log.d(TAG, "Fragment New Instance launched");
 
         return fragment;
     }
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
+
         // ask for permissions NOW!
         setupPermissions();
         // I don't know if this should go here, in example it goes in 'onResume()'
@@ -204,13 +170,17 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_camera_x, container, false);
+
+        /*ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_camera_x, container, false);
         mPreviewViewFinder = (PreviewView) root.findViewById(R.id.viewFinder);
         mCaptureImageButton = (ImageButton) root.findViewById(R.id.image_capture_button);
-        mSwitchCameraButton = (ImageButton) root.findViewById(R.id.switch_camera_button);
+        mSwitchCameraButton = (ImageButton) root.findViewById(R.id.switch_camera_button);*/
+
+        fragmentCameraXBinding = FragmentCameraXBinding.inflate(inflater, container, false);
+        View view = fragmentCameraXBinding.getRoot();
 
         Log.d(TAG, "on create view complete");
-        return root;
+        return view;
 
     }
 
@@ -218,18 +188,24 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         //newInstance();
         mCameraProviderFuture = ProcessCameraProvider.getInstance(safeContext);
         setupCamera(); //setup camera if permission has been granted by user
 
         // set onclick listener to runnable take photo to capture image button
-        mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
-
+        //mCaptureImageButton.setOnClickListener(takePhotoOnClickListener);
+        fragmentCameraXBinding.imageCaptureButton.setOnClickListener(takePhotoOnClickListener);
         // set onclick listener to runnable to switch lens
-        mSwitchCameraButton.setOnClickListener(switchCameraOnClickListener);
+        //mSwitchCameraButton.setOnClickListener(switchCameraOnClickListener);
+        fragmentCameraXBinding.switchCameraButton.setOnClickListener(switchCameraOnClickListener);
     }
 
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        fragmentCameraXBinding = null;
+    }
 
     /**
      * Initialise the camera, the use cases and extensions (if any), set to preview/
@@ -326,9 +302,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     private View.OnClickListener switchCameraOnClickListener = new View.OnClickListener() {
 
         @Override
-        public void onClick(View view) {
-            switchCamera();
-        }
+        public void onClick(View view) { switchCamera(); }
     };
 
     // method to actually switch the camera
@@ -337,11 +311,37 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         mCameraProvider.unbindAll();
 
         // rebind with new CameraSelector
-        if (mLensFacingChoice == CameraSelector.LENS_FACING_BACK) {
-            mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+        try {
+            // make sure front camera exists
+            if (mLensFacingChoice == CameraSelector.LENS_FACING_BACK && hasFrontCamera()) {
+                mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+            } else {
+                mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+            }
+        } catch (CameraInfoUnavailableException e) {
+            e.printStackTrace();
+        }
+        // rebind use cases
+        bindCameraUseCases();
+    }
+
+
+    private void autoSwitchCameraOnAlertActivated() {
+        // first unbind camera
+        mCameraProvider.unbindAll();
+
+        if (isFaceUp) {
+            try {
+                if (mLensFacingChoice == CameraSelector.LENS_FACING_BACK && hasFrontCamera()) {
+                    mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+                }
+            } catch (CameraInfoUnavailableException e) {
+                e.printStackTrace();
+            }
         } else {
             mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
         }
+
         // rebind use cases
         bindCameraUseCases();
     }
@@ -352,9 +352,13 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     private void bindCameraUseCases() {
 
         // preview
+
+        //float rotation =  mPreviewViewFinder.getRotation();
         mPreview = new Preview.Builder().build();
         // set surface provider
-        mPreview.setSurfaceProvider(mPreviewViewFinder.getSurfaceProvider());
+
+        mPreview.setSurfaceProvider(fragmentCameraXBinding.viewFinder.getSurfaceProvider());
+
         // image capture
         mImageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
@@ -367,6 +371,12 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
         CameraSelector cameraSelector =
                 new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
+
+        /**
+         * Extensions currently don't work with CameraX libraries
+         * Issue: ProcessCameraProvider inherited from CameraProvider but
+         * here the former cannot be passed as the latter
+         */
 
         mCamera = mCameraProvider.bindToLifecycle(
                 this,
@@ -394,6 +404,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
     /**
      * Request permission if missing.
+     *
+     * Must further prompt user to explain why camera permission required
      */
     private void setupPermissions() {
         if (isPermissionMissing()) {
