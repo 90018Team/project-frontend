@@ -1,12 +1,18 @@
 package com.example.help.ui.chatRoom;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -14,15 +20,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.help.R;
+import com.example.help.databinding.ActivityChatBinding;
 import com.example.help.databinding.ActivityMainBinding;
 import com.example.help.models.Message;
+import com.example.help.util.IntentUtility;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.api.Distribution;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,145 +39,265 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.Nullable;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity";
-    private ActivityMainBinding binding;
-    private EditText editText;
-    private Button button;
-    private RecyclerView recyclerView;
-    private LinearLayoutManager linearLayoutManager;
-    private FirebaseRecyclerAdapter adapter;
+    private static final int REQUEST_IMAGE = 2; // No idea what the hell is this magic number, maybe in the doc somewhere ----Caleb
+    private static String MESSAGES_CHILD = "messages"; //TODO: This child name needs to be changed (it is the 'topic' that we subscribe in the real-time db)
+    private ActivityChatBinding mBinding;
+
+
+    // Firebase instance variables
+    private DatabaseReference mFirebaseDatabaseReference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
-        // The FirebaseRecyclerAdapter class and options come from the FirebaseUI library
-        // See: https://github.com/firebase/FirebaseUI-Android
-        editText = findViewById(R.id.chat_edit);
-        button = findViewById(R.id.send);
-        recyclerView = findViewById(R.id.messages_list);
+//        setContentView(R.layout.activity_chat);
 
-        // button actions
-        button.setOnClickListener(view -> {
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("posts").push();
-            Message m = new Message(editText.getText().toString(),getUserName(),getPhotoUrl(),null);
-            databaseReference.child("Message").push().setValue(m);
-            // clear the text
-            editText.setText("");
-        });
-        linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setHasFixedSize(true); // may not needed.
-
+        mBinding = ActivityChatBinding.inflate(getLayoutInflater());
+        setContentView(mBinding.getRoot());
         // fetch data
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference messageRef = database.getReference("message");
-        FirebaseRecyclerOptions<Message> options =
-                new FirebaseRecyclerOptions.Builder<Message>()
-                        .setQuery(messageRef, Message.class)
-                        .setLifecycleOwner(this)
-                        .build();
-        adapter = new FirebaseRecyclerAdapter<Message,MessageHolder>(options) {
+        // New child entries
+        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+        DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
+
+        // Configure the options required for FirebaseRecyclerAdapter with the above Query reference
+        FirebaseRecyclerOptions<Message> options = new FirebaseRecyclerOptions.Builder<Message>()
+                .setQuery(messagesRef, Message.class)
+                // Listen to the changes in the Query and automatically update to the UI
+                .setLifecycleOwner(this)
+                .build();
+
+        // Construct the FirebaseRecyclerAdapter with the options set
+        FirebaseRecyclerAdapter<Message, MessageHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Message, MessageHolder>(options) {
             @NonNull
             @Override
             public MessageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item, parent, false);
-                return new MessageHolder(view);
+                return new MessageHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.message, parent, false)
+                );
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull MessageHolder holder, int position, @NonNull Message model) {
-                holder.setName(model.getName());
-                holder.setTxtDesc(model.getText());
-                int finalPosition = holder.getAdapterPosition();
-                holder.root.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Toast.makeText(ChatActivity.this, String.valueOf(finalPosition), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            protected void onBindViewHolder(@NonNull MessageHolder holder, int position, @NonNull Message message) {
+                mBinding.progressBar.setVisibility(ProgressBar.INVISIBLE);
+                holder.bindMessage(message);
             }
-
         };
-        recyclerView.setAdapter(adapter);
-//        binding = ActivityMainBinding.inflate(getLayoutInflater());
-//        binding.progressBar.visibility = ProgressBar.INVISIBLE;
-//        LinearLayoutManager manager = new LinearLayoutManager(this);
-//        manager.setStackFromEnd(true);
-//        binding.messageRecyclerView.layoutManager = manager;
-//        binding.messageRecyclerView.adapter = adapter;
 
+        // Initialize LinearLayoutManager and RecyclerView
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        mBinding.messageRecyclerView.setLayoutManager(linearLayoutManager);
+        mBinding.messageRecyclerView.setAdapter(firebaseRecyclerAdapter);
+//        mBinding.messageRecyclerView.addItemDecoration(new VerticalListItemSpacingDecoration(
+//                getResources().getDimensionPixelSize(R.dimen.main_item_list_spacing),
+//                getResources().getDimensionPixelSize(R.dimen.main_item_parent_spacing)
+//        ));
 
+        // Register an observer for watching changes in the Adapter data in order to scroll
+        // to the bottom of the list when the user is at the bottom of the list
+        // in order to show newly added messages
+        firebaseRecyclerAdapter.registerAdapterDataObserver(
+                new ScrollToBottomObserver(
+                        mBinding.messageRecyclerView,
+                        firebaseRecyclerAdapter,
+                        linearLayoutManager
+                )
+        );
+
+        // Disable the send button when there is no text in this input message field
+        mBinding.chatEdit.addTextChangedListener(new ButtonObserver(mBinding.send));
+
+        // Register a click listener on the Send Button to send messages on click
+        mBinding.send.setOnClickListener(view -> {
+            Message friendlyMessage = new Message(
+                    getMessageToSend(),
+                    getUserName(),
+                    getUserPhotoUrl(),
+                    null /* not an image based message */
+            );
+
+            // Create a child reference and set the user's message at that location
+            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+                    .push().setValue(friendlyMessage);
+            // Clear the input message field for the next message
+            mBinding.chatEdit.setText("");
+        });
+
+        // Register a click listener on the Add Image Button to send messages with Image on click
+        mBinding.image.setOnClickListener(view -> {
+            // Launch Gallery Intent for Image selection
+            IntentUtility.launchGallery(ChatActivity.this, REQUEST_IMAGE);
+        });
     }
 
-//    // deprecated method
-//    public void fetchData() {
-//        // Write a message to the database
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        DatabaseReference messageRef = database.getReference("message");
-//        // Read from the database
-//        messageRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                // This method is called once with the initial value and again
-//                // whenever data at this location is updated.
-//                String value = dataSnapshot.getValue(String.class);
-//                Log.d(TAG, "Value is: " + value);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError error) {
-//                // Failed to read value
-//                Log.w(TAG, "Failed to read value.", error.toException());
-//            }
-//        });
-//
-//    }
     @Override
     protected void onStart() {
         super.onStart();
-        adapter.startListening();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        adapter.stopListening();
     }
 
     private String getUserName(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         return user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
     }
-    private String getPhotoUrl(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        return user.getPhotoUrl()==null?"":user.getPhotoUrl().toString();
+    /**
+     * Extracts the user typed message from 'R.id.messageEditText' EditText and returns the same.
+     * Can be an empty string when there is no message typed in.
+     */
+    private String getMessageToSend() {
+        if (mBinding.chatEdit.getText() == null) {
+            return "";
+        } else {
+            return mBinding.chatEdit.getText().toString();
+        }
     }
 
-    public class MessageHolder extends RecyclerView.ViewHolder {
-        public LinearLayout root;
-        public TextView txtTitle;
-        public TextView txtDesc;
-
-        public MessageHolder(View itemView) {
-            super(itemView);
-            root = itemView.findViewById(R.id.list_root);
-            txtTitle = itemView.findViewById(R.id.list_title);
-            txtDesc = itemView.findViewById(R.id.list_desc);
+    /**
+     * Returns the URL to the User's profile picture as stored in Firebase Project's user database.
+     * Can be {@code null} when not present or if user is not authenticated.
+     */
+    @Nullable
+    private String getUserPhotoUrl() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getPhotoUrl() != null) {
+            return user.getPhotoUrl().toString();
         }
+        return null;
+    }
+    /**
+     * Called when an activity you launched exits, giving you the requestCode
+     * you started it with, the resultCode it returned, and any additional
+     * data from it. The <var>resultCode</var> will be
+     * {@link #RESULT_CANCELED} if the activity explicitly returned that,
+     * didn't return any result, or crashed during its operation.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     *                    (various data can be attached to Intent "extras").
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        public void setName(String string) {
-            txtTitle.setText(string);
+        if (requestCode == REQUEST_IMAGE) {
+            // If the request was for Image selection
+
+            if (resultCode == RESULT_OK && data != null) {
+                // If we have the result and its data
+
+                // Get the URI to the image file selected
+                final Uri imageUri = data.getData();
+
+                // Construct a message with temporary loading image
+                final Message tempMessage = new Message(
+                        getMessageToSend(),  // If user has entered some message, publish it as well
+                        getUserName(),
+                        getUserPhotoUrl(),
+                        ""  // Temporary image with loading indicator
+                );
+
+                // Create a child reference and set the user's message at that location
+                FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+                        .push().setValue(tempMessage, new DatabaseReference.CompletionListener() {
+                    /**
+                     * This method will be triggered when the operation has either succeeded or failed. If it has
+                     * failed, an error will be given. If it has succeeded, the error will be null
+                     *
+                     * @param error A description of any errors that occurred or null on success
+                     * @param ref A reference to the specified Firebase Database location
+                     */
+                    @Override
+                    public void onComplete(
+                            @Nullable DatabaseError error,
+                            @NonNull DatabaseReference ref) {
+                        // Check the error
+                        if (error != null) {
+                            // Log the error and return
+                            Log.w(TAG,
+                                    "Unable to write message to the database.",
+                                    error.toException()
+                            );
+                            return;
+                        }
+
+                        // Get the key to this database reference
+                        String databaseKey = ref.getKey();
+
+                        // Create a StorageReference for the Image to be uploaded
+                        // in the hierarchy of the database key reference
+                        //noinspection ConstantConditions
+                        StorageReference storageReference = FirebaseStorage.getInstance()
+                                // Create a child location for the current user
+                                .getReference(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                // Create a child location for the database key
+                                .child(databaseKey)
+                                // Create a child with the filename
+                                .child(imageUri.getLastPathSegment());
+
+                        // Begin upload of selected image
+                        putImageInStorage(storageReference, imageUri, databaseKey, tempMessage);
+
+                        // Clear the input message field if any for the next message
+                        mBinding.chatEdit.setText("");
+                    }
+                });
+
+            }
         }
+    }
 
+    /**
+     * Uploads the Image {@code imageUri} selected by the user to the {@code storageReference} pointed
+     * to by the {@code databaseKey}, retrieves the URI to this uploaded file, and then
+     * updates the same to the corresponding Firebase database reference identified by
+     * the {@code databaseKey}, to reflect the URI of the uploaded image,
+     * which then displays the uploaded image to the user.
+     *
+     * @param tempMessage Temporarily prepared {@link Message} instance
+     *                    whose {@link Message#getImageUrl()} property will be
+     *                    updated to the URI of the uploaded image.
+     */
+    private void putImageInStorage(final StorageReference storageReference,
+                                   final Uri imageUri,
+                                   final String databaseKey,
+                                   final Message tempMessage) {
+        // Upload the selected image
+        UploadTask uploadTask = storageReference.putFile(imageUri);
 
-        public void setTxtDesc(String string) {
-            txtDesc.setText(string);
-        }
+        // Chain UploadTask to get the resulting URI Task of the uploaded image
+        uploadTask.continueWithTask(task -> {
+            // Return the resulting URI Task of the uploaded image
+            //noinspection ConstantConditions
+            return task.getResult().getStorage().getDownloadUrl();
+        }).addOnSuccessListener(this, uri -> {
+            // When all tasks have completed successfully, update the corresponding reference
+            // in the database with the URI of the uploaded image
+            tempMessage.setImageUrl(uri.toString());
+            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+                    .child(databaseKey)
+                    .setValue(tempMessage);
+        }).addOnFailureListener(this, e -> {
+            // Log the exception in case of failure
+            Log.w(TAG, "Image upload task was not successful.", e);
+        });
     }
 }
