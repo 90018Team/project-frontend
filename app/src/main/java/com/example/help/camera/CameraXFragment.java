@@ -6,11 +6,15 @@ import static android.content.Context.SENSOR_SERVICE;
 import android.Manifest;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -36,11 +40,16 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestListener;
+import com.example.help.BuildConfig;
 import com.example.help.R;
 import com.example.help.databinding.FragmentCameraXBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Objects;
@@ -198,6 +207,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         // set onclick listener to runnable to switch lens
         //mSwitchCameraButton.setOnClickListener(switchCameraOnClickListener);
         fragmentCameraXBinding.switchCameraButton.setOnClickListener(switchCameraOnClickListener);
+
+        fragmentCameraXBinding.photoViewButton.setOnClickListener(photoViewOnClickListener);
     }
 
 
@@ -205,6 +216,16 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     public void onDestroyView() {
         super.onDestroyView();
         fragmentCameraXBinding = null;
+    }
+
+    private void setGalleryThumbnailImage(Uri uri) {
+
+        getActivity().runOnUiThread(() -> Glide.with(safeContext)
+                                            .load(uri)
+                                            .centerCrop()
+                                            .transform(new CircleCrop())
+                                            .into(fragmentCameraXBinding.photoViewButton));
+
     }
 
     /**
@@ -279,6 +300,22 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                 @Override
                 public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                     String msg = "Pic captured at " + file.getAbsolutePath();
+
+                    // save image as uri for retrieval by thumbnail
+                    Uri savedImageUri = Uri.fromFile(file);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        setGalleryThumbnailImage(savedImageUri);
+                    }
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                        Intent intent = new Intent();
+                        intent.setAction(android.content.Intent.ACTION_VIEW);
+                        intent.putExtra(Intent.EXTRA_STREAM, savedImageUri);
+                        intent.setType("image/*");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+
+
                     //Toast.makeText(getBaseContext(), msg,Toast.LENGTH_LONG).show();
                     showToast(msg);
                     Log.d(TAG, msg);
@@ -294,6 +331,31 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
             });
         }
     };
+
+    /**
+     * Method to add prev photo to thumbnail and make it clickable to intent to open gallery
+     */
+    private View.OnClickListener photoViewOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            //File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File sdDir = getBaseFolder();
+            //File f = new File(sdDir, "MyAppPics");
+
+            Intent i = new Intent();
+            i.setAction(Intent.ACTION_VIEW);
+            i.setDataAndType(Uri.fromFile(sdDir), "image/*");
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+
+        }
+    };
+
+    /**
+     * Method to analyse image for face detect
+     */
+
 
     /**
      * Method to switch between back & front + vice/versa camera source to view
@@ -345,6 +407,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         // rebind use cases
         bindCameraUseCases();
     }
+
+
 
     /**
      * method to declare and bind the CameraX use cases
