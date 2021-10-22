@@ -50,17 +50,16 @@ import java.util.Map;
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity";
     private static final int REQUEST_IMAGE = 2; // No idea what the hell is this magic number, maybe in the doc somewhere ----Caleb
-    private static String MESSAGES_CHILD = "messages"; //TODO: This child name needs to be changed (it is the 'topic' that we subscribe in the real-time db)
+    private static String MESSAGES_CHILD = "/emergency_event/"; //it is the 'topic' that we subscribe in the real-time db
     private ActivityChatBinding mBinding;
 
 
     // Firebase instance variables
-    private DatabaseReference mFirebaseDatabaseReference;
+    public DatabaseReference mFirebaseDatabaseReference;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_chat);
-
         mBinding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
         // fetch data
@@ -68,7 +67,34 @@ public class ChatActivity extends AppCompatActivity {
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
-
+        DatabaseReference finalMessagesRef = messagesRef;
+        messagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.hasChild(getUserName())) {
+                    // run some code
+                    Log.d(TAG, "onDataChange: The room exists, proceed to the room.");
+                }
+                else{
+                    Log.d(TAG, "onDataChange: The room is not found, creating...");
+                    Message initMessage = new Message(
+                        "TODO: GPS location here",/* TODO: GPS location as message (or maybe some other form of data?)*/
+                        getUserName(),
+                        getUserPhotoUrl(),
+                        null /* TODO: we can include image URL(camera), and voice URL(audio)*/
+                );
+                    // Create a child reference and set the user's message at that location
+                    finalMessagesRef.child(getUserName())
+                            .push().setValue(initMessage);
+                }
+                Log.d(TAG, "onDataChange: room created");
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d(TAG, "onCancelled: Something wrong?");
+            }
+        });
+        messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD+getUserName());
         // Configure the options required for FirebaseRecyclerAdapter with the above Query reference
         FirebaseRecyclerOptions<Message> options = new FirebaseRecyclerOptions.Builder<Message>()
                 .setQuery(messagesRef, Message.class)
@@ -128,7 +154,7 @@ public class ChatActivity extends AppCompatActivity {
             );
 
             // Create a child reference and set the user's message at that location
-            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+getUserName())
                     .push().setValue(friendlyMessage);
             // Clear the input message field for the next message
             mBinding.chatEdit.setText("");
@@ -216,7 +242,7 @@ public class ChatActivity extends AppCompatActivity {
                 );
 
                 // Create a child reference and set the user's message at that location
-                FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+                FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+getUserName())
                         .push().setValue(tempMessage, new DatabaseReference.CompletionListener() {
                     /**
                      * This method will be triggered when the operation has either succeeded or failed. If it has
@@ -292,7 +318,7 @@ public class ChatActivity extends AppCompatActivity {
             // When all tasks have completed successfully, update the corresponding reference
             // in the database with the URI of the uploaded image
             tempMessage.setImageUrl(uri.toString());
-            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+            FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+getUserName())
                     .child(databaseKey)
                     .setValue(tempMessage);
         }).addOnFailureListener(this, e -> {
