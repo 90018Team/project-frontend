@@ -3,14 +3,6 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/activity_chat.xml" value="0.1" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/activity_main.xml" value="0.1640625" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/activity_settings.xml" value="0.19895833333333332" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/activity_signin.xml" value="0.22" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/list_item.xml" value="0.1" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/layout/setting_fragment.xml" value="0.19895833333333332" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/menu/bottom_nav_menu.xml" value="0.1640625" />
-        <entry key="..\:/Users/wkl91/Desktop/chaofanqw-COMP90018-Tutorial-master/project-frontend/app/src/main/res/xml/setting_preference.xml" value="0.1640625" />
         <entry key="..\:/Users/z63zh/90018/HELP/app/src/main/res/layout/activity_main.xml" value="0.2957427536231884" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.23489583333333333" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/drawable/circle.xml" value="0.23489583333333333" />
@@ -20,8 +12,13 @@
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/activity_chat.xml" value="0.28306159420289856" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/activity_main.xml" value="0.28306159420289856" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/alert_fragment.xml" value="0.21875" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/alert_list_fragment.xml" value="0.271286231884058" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/contact_fragment.xml" value="0.21875" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_list.xml" value="0.271286231884058" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_list_list.xml" value="0.271286231884058" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_maps.xml" value="0.271286231884058" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/home_fragment.xml" value="0.21875" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/map_fragment.xml" value="0.271286231884058" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/menu/bottom_nav_menu.xml" value="0.38697916666666665" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.23489583333333333" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.25" />

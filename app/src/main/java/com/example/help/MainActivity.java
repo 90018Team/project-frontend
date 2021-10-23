@@ -35,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        if(!isCurrentUserSignedIn()){
-            Log.d("Main activity", "onCreate: "+"user not signed in");
-            startActivity(new Intent(this,SignInActivity.class));
-            finish();
-            return;
-        }
+//        if(!isCurrentUserSignedIn()){
+//            Log.d("Main activity", "onCreate: "+"user not signed in");
+//            startActivity(new Intent(this,SignInActivity.class));
+//            finish();
+//            return;
+//        }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        if(isCurrentUserSignedIn()){
+        if(!isCurrentUserSignedIn()){
             reload();
         }
         else{
