@@ -3,9 +3,10 @@ package com.example.help.camera;
 
 import static android.content.Context.SENSOR_SERVICE;
 
+import static androidx.core.content.FileProvider.getUriForFile;
+
 import android.Manifest;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -16,7 +17,6 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,15 +41,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestListener;
-import com.example.help.BuildConfig;
+import com.bumptech.glide.request.target.Target;
 import com.example.help.R;
 import com.example.help.databinding.FragmentCameraXBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Objects;
@@ -218,7 +219,9 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         fragmentCameraXBinding = null;
     }
 
-    private void setGalleryThumbnailImage(Uri uri) {
+    private void setGalleryThumbnailImage(File file) {
+
+        Uri uri = Uri.fromFile(file);
 
         getActivity().runOnUiThread(() -> Glide.with(safeContext)
                                             .load(uri)
@@ -287,7 +290,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
             // takePicture method of cameraX
 
             // get base directory
-            File directory = getBaseFolder();
+            File directory = getImageFolder();
             // create a file
             File file = createFile(directory, FILENAME, PHOTO_EXTENSION);
 
@@ -302,17 +305,19 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                     String msg = "Pic captured at " + file.getAbsolutePath();
 
                     // save image as uri for retrieval by thumbnail
-                    Uri savedImageUri = Uri.fromFile(file);
+                    //Uri savedImageUri = Uri.fromFile(file);
+
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        setGalleryThumbnailImage(savedImageUri);
+                        setGalleryThumbnailImage(file);
                     }
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        Intent intent = new Intent();
+                       /* Intent intent = new Intent();
                         intent.setAction(android.content.Intent.ACTION_VIEW);
                         intent.putExtra(Intent.EXTRA_STREAM, savedImageUri);
                         intent.setType("image/*");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                        startActivity(intent);*/
                     }
 
 
@@ -339,7 +344,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         @Override
         public void onClick(View view) {
 
-            //File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            /*//File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             File sdDir = getBaseFolder();
             //File f = new File(sdDir, "MyAppPics");
 
@@ -349,8 +354,44 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
 
+
+*/
+            //File[] imageFileList = new File[0];
+//            File imagePath = getImageFolder();
+//
+//            File[] imageFileList = imagePath.listFiles();
+//
+//
+//
+//            Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", imagePath);
+//
+//            //safeContext.grantUriPermission("image/*", contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//
+//            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//            intent.setDataAndType(contentUri, "*/*");
+//            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//            startActivity(Intent.createChooser(intent, "Open Folder"));
+
+            /*File file = getImageFolder();
+
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.withAppendedPath(Uri.fromFile(file), "/my_images"), "image/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);*/
+
+            Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", new File(getImageFolder() + File.separator));
+
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setDataAndType(contentUri, "*/*");
+            intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
         }
     };
+
+    private void openImageUriInImageGalleryWithFileProvider(Uri uri) {
+
+    }
 
     /**
      * Method to analyse image for face detect
@@ -457,13 +498,17 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     }
 
     // get base folder for saving images?
-    private File getBaseFolder() {
-        ContextWrapper cw = new ContextWrapper(getActivity().getBaseContext());
+    private File getImageFolder() {
 
-        //String fullPath = cw.getExternalFilesDir(Environment.DIRECTORY_DCIM).toString();
-        File baseFolder = cw.getExternalFilesDir(Environment.DIRECTORY_DCIM);
+        //File imagePath = new File(safeContext.getFilesDir() + File.separator + "images");
 
-        return baseFolder;
+        File imagePath = new File(safeContext.getFilesDir(), "my_images");
+
+        if (!imagePath.exists()) {
+            imagePath.mkdir();
+        }
+
+        return imagePath;
     }
 
     /**
