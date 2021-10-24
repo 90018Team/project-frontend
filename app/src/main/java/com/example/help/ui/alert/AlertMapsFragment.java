@@ -57,7 +57,7 @@ public class AlertMapsFragment extends Fragment {
 
 
             // setBounds
-            Double padding = 0.005;
+            Double padding = 0.001;
             LatLngBounds viewBounds = new LatLngBounds(
                     new LatLng(curLocation.latitude - padding, curLocation.longitude - padding), // SW bounds
                     new LatLng(curLocation.latitude + padding, curLocation.longitude + padding) // NE bounds
@@ -68,8 +68,8 @@ public class AlertMapsFragment extends Fragment {
             alerts[2] = new Alert(3, "gaga333", "-33.852", "151.212");
 
             // marker format
-            int height = 100;
-            int width = 120;
+            int height = 200;
+            int width = 250;
             BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.marker);
             Bitmap b = bitmapdraw.getBitmap();
             Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
