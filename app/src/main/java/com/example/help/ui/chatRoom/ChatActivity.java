@@ -3,33 +3,21 @@ package com.example.help.ui.chatRoom;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.help.R;
 import com.example.help.databinding.ActivityChatBinding;
-import com.example.help.databinding.ActivityMainBinding;
 import com.example.help.models.Message;
-import com.example.help.util.IntentUtility;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,14 +32,13 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity";
     private static final int REQUEST_IMAGE = 2; // No idea what the hell is this magic number, maybe in the doc somewhere ----Caleb
     private static String MESSAGES_CHILD = "/emergency_event/"; //it is the 'topic' that we subscribe in the real-time db
     private ActivityChatBinding mBinding;
+    private String imageUri = null;
+    private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif"; //TODO: bad practice, will need to be removed (not urgent) -- Caleb
 
 
     // Firebase instance variables
@@ -86,8 +73,8 @@ public class ChatActivity extends AppCompatActivity {
                     // Create a child reference and set the user's message at that location
                     finalMessagesRef.child(getUserName())
                             .push().setValue(initMessage);
+                    Log.d(TAG, "onDataChange: room created");
                 }
-                Log.d(TAG, "onDataChange: room created");
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -150,7 +137,7 @@ public class ChatActivity extends AppCompatActivity {
                     getMessageToSend(),
                     getUserName(),
                     getUserPhotoUrl(),
-                    null /* not an image based message */
+                    imageUri
             );
 
             // Create a child reference and set the user's message at that location
@@ -159,11 +146,74 @@ public class ChatActivity extends AppCompatActivity {
             // Clear the input message field for the next message
             mBinding.chatEdit.setText("");
         });
+        ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
+                (ActivityResultCallback<Uri>) result -> {
+                    // Get the URI to the image file selected
+                    final Uri imageUri = result;
 
+                    // Construct a message with temporary loading image
+                    final Message tempMessage = new Message(
+                            getMessageToSend(),  // If user has entered some message, publish it as well
+                            getUserName(),
+                            getUserPhotoUrl(),
+                            LOADING_IMAGE_URL  // Temporary image with loading indicator
+                    );
+                    Log.d(TAG, "onCreate: image uploading");
+                    mBinding.chatEdit.setEnabled(false);
+                    // Create a child reference and set the user's message at that location
+                    FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD)
+                            .push().setValue(tempMessage, new DatabaseReference.CompletionListener() {
+                                /**
+                         * This method will be triggered when the operation has either succeeded or failed. If it has
+                         * failed, an error will be given. If it has succeeded, the error will be null
+                         *
+                         * @param error A description of any errors that occurred or null on success
+                         * @param ref A reference to the specified Firebase Database location
+                         */
+                        @Override
+                        public void onComplete(
+                                @androidx.annotation.Nullable DatabaseError error,
+                                @NonNull DatabaseReference ref) {
+                            // Check the error
+                            if (error != null) {
+                                // Log the error and return
+                                Log.w(TAG,
+                                        "Unable to write message to the database.",
+                                        error.toException()
+                                );
+                                return;
+                            }
+
+                            // Get the key to this database reference
+                            String databaseKey = ref.getKey();
+
+                            // Create a StorageReference for the Image to be uploaded
+                            // in the hierarchy of the database key reference
+                            //noinspection ConstantConditions
+                            StorageReference storageReference = FirebaseStorage.getInstance()
+                                    // Create a child location for the current user
+                                    .getReference(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    // Create a child location for the database key
+                                    .child(databaseKey)
+                                    // Create a child with the filename
+                                    .child(imageUri.getLastPathSegment());
+
+                            // Begin upload of selected image
+                            putImageInStorage(storageReference, imageUri, databaseKey, tempMessage);
+
+                            // Clear the input message field if any for the next message
+                            mBinding.chatEdit.setEnabled(true);
+                            Log.d(TAG, "onComplete: edit enabled");
+                            mBinding.chatEdit.setText("");
+                        }
+                    });
+                });
         // Register a click listener on the Add Image Button to send messages with Image on click
         mBinding.image.setOnClickListener(view -> {
             // Launch Gallery Intent for Image selection
-            IntentUtility.launchGallery(ChatActivity.this, REQUEST_IMAGE);
+            Log.d(TAG, "onCreate: Image button triggered");
+            mGetContent.launch("image/*");
+
         });
     }
 
