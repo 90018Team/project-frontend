@@ -17,6 +17,7 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -307,19 +309,18 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                     // save image as uri for retrieval by thumbnail
                     //Uri savedImageUri = Uri.fromFile(file);
 
-
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         setGalleryThumbnailImage(file);
                     }
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                       /* Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.putExtra(Intent.EXTRA_STREAM, savedImageUri);
-                        intent.setType("image/*");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);*/
-                    }
 
+                        Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", file);
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(contentUri, "image/*");
+                        intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(Intent.createChooser(intent, "Open folder"));
+
+                    }
 
                     //Toast.makeText(getBaseContext(), msg,Toast.LENGTH_LONG).show();
                     showToast(msg);
@@ -344,54 +345,32 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
         @Override
         public void onClick(View view) {
 
-            /*//File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            File sdDir = getBaseFolder();
-            //File f = new File(sdDir, "MyAppPics");
+            File imagePath = getImageFolder();
+            if (imagePath == null) { return; }
+            File[] fileList = imagePath.listFiles();
+            if (fileList.length >= 1) {
+                // open files
+                ArrayList<Uri> uris = new ArrayList<>();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setType("image/*");
+                for (File file : fileList) {
+                    uris.add((getUriForFile(safeContext, "com.example.help.fileprovider", file)));
+                }
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                startActivity(Intent.createChooser(intent, "Open Image"));
+            }
+            else {
+                Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", imagePath);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(contentUri, DocumentsContract.Document.MIME_TYPE_DIR);
+                intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(intent, "Open folder"));
+            }
 
-            Intent i = new Intent();
-            i.setAction(Intent.ACTION_VIEW);
-            i.setDataAndType(Uri.fromFile(sdDir), "image/*");
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-
-
-*/
-            //File[] imageFileList = new File[0];
-//            File imagePath = getImageFolder();
-//
-//            File[] imageFileList = imagePath.listFiles();
-//
-//
-//
-//            Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", imagePath);
-//
-//            //safeContext.grantUriPermission("image/*", contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//
-//            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//            intent.setDataAndType(contentUri, "*/*");
-//            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//            startActivity(Intent.createChooser(intent, "Open Folder"));
-
-            /*File file = getImageFolder();
-
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.withAppendedPath(Uri.fromFile(file), "/my_images"), "image/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);*/
-
-            Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", new File(getImageFolder() + File.separator));
-
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setDataAndType(contentUri, "*/*");
-            intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
         }
     };
 
-    private void openImageUriInImageGalleryWithFileProvider(Uri uri) {
 
-    }
 
     /**
      * Method to analyse image for face detect
@@ -500,9 +479,9 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
     // get base folder for saving images?
     private File getImageFolder() {
 
-        //File imagePath = new File(safeContext.getFilesDir() + File.separator + "images");
+        //File imagePath = new File(safeContext.getFilesDir(), "my_images");
 
-        File imagePath = new File(safeContext.getFilesDir(), "my_images");
+        File imagePath = new File(safeContext.getExternalMediaDirs()[0].toString() + File.separator + "my_images");
 
         if (!imagePath.exists()) {
             imagePath.mkdir();
