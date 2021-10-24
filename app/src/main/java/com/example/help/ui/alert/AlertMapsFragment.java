@@ -4,12 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.help.R;
+import com.example.help.ui.alert.alertRoom.AlertRoomActivity;
+import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.ui.setting.SettingFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,11 +27,19 @@ public class AlertMapsFragment extends Fragment {
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
         @Override
         public void onMapReady(GoogleMap googleMap) {
+
             LatLng sydney = new LatLng(-33.852, 151.211);
+
             googleMap.addMarker(new MarkerOptions()
                     .position(sydney)
                     .title("Marker in Sydney"));
-            // [START_EXCLUDE silent]
+
+            googleMap.setOnMarkerClickListener(marker -> {
+                Toast.makeText(getContext(), marker.getTitle(), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getContext(), AlertRoomActivity.class));
+                return true;
+            });
+
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         }
     };
