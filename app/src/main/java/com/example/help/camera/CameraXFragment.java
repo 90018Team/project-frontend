@@ -2,14 +2,12 @@ package com.example.help.camera;
 
 
 import static android.content.Context.SENSOR_SERVICE;
-
 import static androidx.core.content.FileProvider.getUriForFile;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -35,18 +33,13 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
-
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.example.help.R;
 import com.example.help.databinding.FragmentCameraXBinding;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -318,7 +311,8 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setDataAndType(contentUri, "image/*");
                         intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(Intent.createChooser(intent, "Open folder"));
+                        //startActivity(Intent.createChooser(intent, "Open folder"));
+                        startActivity(intent);
 
                     }
 
@@ -357,14 +351,16 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
                     uris.add((getUriForFile(safeContext, "com.example.help.fileprovider", file)));
                 }
                 intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-                startActivity(Intent.createChooser(intent, "Open Image"));
+                //startActivity(Intent.createChooser(intent, "Open Image"));
+                startActivity(intent);
             }
             else {
                 Uri contentUri = getUriForFile(safeContext, "com.example.help.fileprovider", imagePath);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(contentUri, DocumentsContract.Document.MIME_TYPE_DIR);
                 intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(Intent.createChooser(intent, "Open folder"));
+                //startActivity(Intent.createChooser(intent, "Open folder"));
+                startActivity(intent);
             }
 
         }
@@ -481,7 +477,7 @@ public class CameraXFragment extends Fragment /**implements SensorEventListener*
 
         //File imagePath = new File(safeContext.getFilesDir(), "my_images");
 
-        File imagePath = new File(safeContext.getExternalMediaDirs()[0].toString() + File.separator + "my_images");
+        File imagePath = new File(safeContext.getExternalMediaDirs()[0].toString() + File.separator + "HELP_images");
 
         if (!imagePath.exists()) {
             imagePath.mkdir();
