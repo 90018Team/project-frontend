@@ -7,8 +7,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
-public class TabLayoutAdapter extends FragmentPagerAdapter {
+public class TabLayoutAdapter extends FragmentStatePagerAdapter {
 
     Context mContext;
     int mTotalTabs;
@@ -29,7 +30,7 @@ public class TabLayoutAdapter extends FragmentPagerAdapter {
             case 1:
                 return new AlertListFragment();
             default:
-                return null;
+                return  null;
 
         }
     }
