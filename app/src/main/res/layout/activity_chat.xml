@@ -25,7 +25,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/angry_btn"
+            android:id="@+id/alert_cancel"
             android:text="@string/cancel_the_alert"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
@@ -41,24 +41,6 @@
 
 
     </LinearLayout>
-
-<!--TODO: TO BE DELETED-->
-<!--    <LinearLayout-->
-<!--        android:id="@+id/sent_messages"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:orientation="horizontal">-->
-<!-- -->
-<!--    </LinearLayout>-->
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/messages_list"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_above="@+id/chat_top"-->
-<!--        tools:listitem="@layout/message"-->
-<!--        >-->
-<!--    </androidx.recyclerview.widget.RecyclerView>-->
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -76,6 +58,7 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/voice_upload"
                 android:layout_width="0dp"
                 android:layout_height="35dp"
                 android:layout_marginLeft="10dp"

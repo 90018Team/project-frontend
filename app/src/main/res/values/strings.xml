@@ -15,4 +15,5 @@
     <string name="string_log_out">LOG OUT</string>
     <string name="app_setting">App settings</string>
     <string name="default_message_title">Default message</string>
+    <string name="voice_placeHolder_empty">Voice URL</string>
 </resources>

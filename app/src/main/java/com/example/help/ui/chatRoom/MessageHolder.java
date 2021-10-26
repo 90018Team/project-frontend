@@ -1,6 +1,7 @@
 package com.example.help.ui.chatRoom;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.help.R;
 import com.example.help.databinding.MessageBinding;
 import com.example.help.models.Message;
@@ -40,6 +42,7 @@ public class MessageHolder extends RecyclerView.ViewHolder {
         message.setText(string);
     }
     public void bindMessage(Message friendlyMessage) {
+        GlideApp.with(mBinding.messageImageView.getContext()).clear(mBinding.messageImageView);
         if (friendlyMessage.getText() != null && !TextUtils.isEmpty(friendlyMessage.getText())) {
             // If it contains a text message
             mBinding.messageTextView.setText(friendlyMessage.getText());
@@ -50,15 +53,24 @@ public class MessageHolder extends RecyclerView.ViewHolder {
             mBinding.messageTextView.setVisibility(View.GONE);
         }
 
+        if (friendlyMessage.getVoiceUrl() != null) {
+            // If it contains an Image
+
+            // Read the Image URL
+            String voiceUrl = friendlyMessage.getVoiceUrl();
+            mBinding.messageVoiceView.setAudio(voiceUrl);
+//            mBinding.messageVoiceView.setText(voiceUrl);
+            mBinding.messageVoiceView.setVisibility(View.VISIBLE);
+
+        } else {
+            // If it does not contain any Voice
+            mBinding.messageVoiceView.setVisibility(View.GONE);
+        }
         if (friendlyMessage.getImageUrl() != null) {
             // If it contains an Image
 
             // Read the Image URL
             String imageUrl = friendlyMessage.getImageUrl();
-
-            if (imageUrl.startsWith("gs://")) {
-                // If the Image URL is pointing to an Image stored in Firebase Cloud Storage
-
                 // Get the Storage Reference pointing to the Image URL
                 StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
 
@@ -67,30 +79,16 @@ public class MessageHolder extends RecyclerView.ViewHolder {
                         .load(storageReference)
                         .into(mBinding.messageImageView);
 
-            } else {
-                // If the Image URL is not from Firebase Cloud Storage,
-                // then load the Image from URL into ImageView directly using Glide
-                GlideApp.with(mBinding.messageImageView.getContext())
-                        .load(friendlyMessage.getImageUrl())
-                        .into(mBinding.messageImageView);
-            }
 
-            mBinding.messageImageView.setVisibility(View.VISIBLE);
+            // On both messages
+            // Set the messenger's profile picture
+            GlideApp.with(mBinding.getRoot().getContext())
+                    .load(friendlyMessage.getPhotoUrl())
+                    .fallback(R.drawable.ic_account_circle_black_36dp)
+                    .into(mBinding.messengerImageView);
 
-        } else {
-            // If it does not contain any Image
-            mBinding.messageImageView.setVisibility(View.GONE);
+            // Set the messenger's name
+            mBinding.messengerTextView.setText(friendlyMessage.getName());
         }
-
-        // On both messages
-
-        // Set the messenger's profile picture
-        GlideApp.with(mBinding.getRoot().getContext())
-                .load(friendlyMessage.getPhotoUrl())
-                .fallback(R.drawable.ic_account_circle_black_36dp)
-                .into(mBinding.messengerImageView);
-
-        // Set the messenger's name
-        mBinding.messengerTextView.setText(friendlyMessage.getName());
     }
 }

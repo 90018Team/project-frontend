@@ -7,18 +7,20 @@ public class Message {
     private String name;
     private String photoUrl;
     private String imageUrl;
-
+    private String voiceUrl;
+    private String voiceTempPath;
     /**
      * Empty constructor required for Firebase auto data mapping
      */
     public Message() {
     }
 
-    public Message(String text, String name, String photoUrl, String imageUrl) {
+    public Message(String text, String name, String photoUrl, String imageUrl, String voiceUrl) {
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
         this.imageUrl = imageUrl;
+        this.voiceUrl = voiceUrl;
     }
 
     public String getId() {
@@ -59,5 +61,21 @@ public class Message {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getVoiceUrl() {
+        return voiceUrl;
+    }
+
+    public void setVoiceUrl(String voiceUrl) {
+        this.voiceUrl = voiceUrl;
+    }
+
+    public String getVoiceTempPath() {
+        return voiceTempPath;
+    }
+
+    public void setVoiceTempPath(String voiceTempPath) {
+        this.voiceTempPath = voiceTempPath;
     }
 }

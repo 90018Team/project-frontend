@@ -53,16 +53,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        // Connect to network (local simulator for debug)
-        // When running in debug mode, connect to the Firebase Emulator Suite.
-        // "10.0.2.2" is a special IP address which allows the Android Emulator
-        // to connect to "localhost" on the host computer. The port values (9xxx)
-        // must match the values defined in the firebase.json file.
-//        if (BuildConfig.DEBUG) {
-//            FirebaseDatabase.getInstance().useEmulator("10.0.2.2", 9000);
-//            FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
-//            FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
-//        }
     }
 
     @Override
