@@ -38,6 +38,7 @@
         <entry key="app/src/main/res/layout/alert_fragment.xml" value="0.37182971014492755" />
         <entry key="app/src/main/res/layout/contact_fragment.xml" value="0.2703125" />
         <entry key="app/src/main/res/layout/fragment_camera_x.xml" value="0.41983695652173914" />
+        <entry key="app/src/main/res/layout/fragment_camera_x_auto_child.xml" value="0.265625" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2703125" />
         <entry key="app/src/main/res/layout/home_fragment.xml" value="0.37182971014492755" />
         <entry key="app/src/main/res/xml/file_paths.xml" value="0.2890625" />

@@ -71,11 +71,7 @@
             android:textColor="@color/theme_red_dark"
             android:textSize="18sp" />
 
-            <FrameLayout
-                android:id="@+id/camerax_child_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/margin_large"/>
+
 
     </LinearLayout>
 </LinearLayout>
