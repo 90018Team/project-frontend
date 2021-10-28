@@ -16,12 +16,13 @@
         android:paddingHorizontal="16dp"
         tools:listitem="@layout/message"
         />
-<LinearLayout
+    <LinearLayout
         android:id="@+id/chat_top"
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:gravity="center"
+        android:background="@color/white"
         android:orientation="horizontal">
 
         <Button

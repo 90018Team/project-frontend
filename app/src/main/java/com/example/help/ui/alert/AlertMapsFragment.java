@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import com.example.help.R;
 import com.example.help.models.Alert;
-import com.example.help.ui.alert.alertRoom.AlertRoomActivity;
+import com.example.help.ui.chatRoom.ChatActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -123,7 +123,8 @@ public class AlertMapsFragment extends Fragment {
 
             googleMap.setOnMarkerClickListener(marker -> {
                 Toast.makeText(getContext(), marker.getTitle(), Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(getContext(), AlertRoomActivity.class);
+                Intent i = new Intent(getContext(), ChatActivity.class);
+                i.putExtra("from", "visitor");
                 i.putExtra("name", marker.getTitle());
                 startActivity(i);
                 return true;

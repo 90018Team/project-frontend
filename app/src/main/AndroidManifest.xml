@@ -28,9 +28,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
         <activity
-            android:name=".ui.alert.alertRoom.AlertRoomActivity"
-            android:exported="true" />
-        <activity
             android:name=".ui.chatRoom.ChatActivity"
             android:exported="true" />
         <activity
