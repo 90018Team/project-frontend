@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.help">
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
+    <uses-feature android:name="android.hardware.camera.any" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -14,17 +15,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HELP">
-<!--        <activity-->
-<!--            android:name=".camera.CameraXActivity"-->
-<!--            android:screenOrientation="portrait"-->
-<!--            android:exported="true" />-->
+
+
+        <!-- <activity -->
+        <!-- android:name=".camera.CameraXActivity" -->
+        <!-- android:screenOrientation="portrait" -->
+        <!-- android:exported="true" /> -->
         <activity
             android:name=".ui.chatRoom.ChatActivity"
             android:exported="true" />
         <activity
             android:name=".ui.signIn.SignInActivity"
             android:exported="true" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true"

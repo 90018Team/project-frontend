@@ -35,6 +35,7 @@
         <entry key="app/src/main/res/drawable/ic_shutter_normal.xml" value="0.3125" />
         <entry key="app/src/main/res/drawable/ic_shutter_pressed.xml" value="0.3125" />
         <entry key="app/src/main/res/layout/activity_camera_xactivity.xml" value="0.3234375" />
+        <entry key="app/src/main/res/layout/activity_home.xml" value="0.33695652173913043" />
         <entry key="app/src/main/res/layout/alert_fragment.xml" value="0.37182971014492755" />
         <entry key="app/src/main/res/layout/contact_fragment.xml" value="0.2703125" />
         <entry key="app/src/main/res/layout/fragment_camera_x.xml" value="0.41983695652173914" />

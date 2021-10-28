@@ -35,12 +35,14 @@ import androidx.annotation.Nullable;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.help.ui.chatRoom.ChatActivity;
@@ -93,7 +95,7 @@ public class HomeFragment extends Fragment {
     // Camera Selectors for front and rear available
     // Default starting assume back camera
     private int mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
-    private ExecutorService mImageCaptureExecutorService = Executors.newFixedThreadPool(10);
+    private ExecutorService mImageCaptureExecutorService = Executors.newCachedThreadPool();
     private ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
     private ProcessCameraProvider mCameraProvider;
     // use cases
@@ -118,8 +120,9 @@ public class HomeFragment extends Fragment {
         // ask for permissions NOW!
         setupPermissions();
         // I don't know if this should go here, in example it goes in 'onResume()'
-        mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
-        mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        //mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
+        //mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
 
     }
 
@@ -139,6 +142,7 @@ public class HomeFragment extends Fragment {
         frameLayout1 = root.findViewById(R.id.frameLayout1);
         params = frameLayout1.getLayoutParams();
         mHeight = params.height;
+        
 
         /**
          * Do Camera Setup
@@ -187,11 +191,11 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    @Override
+    /*@Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-    }
+    }*/
 
     private void endplay() {
 
@@ -224,7 +228,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // now seems to allow close camerax
         binding = null;
+        //mCameraProvider.unbindAll();
     }
 
     /**
@@ -255,8 +261,47 @@ public class HomeFragment extends Fragment {
                 } catch (CameraInfoUnavailableException e) {
                     e.printStackTrace();
                 }
+                // Just do basic setup and take picture for now
+                // preview
+                SurfaceTexture surfaceTexture = new SurfaceTexture(10);
+                Preview.SurfaceProvider surfaceProvider = request -> {
+                    Size resolution = request.getResolution();
+                    surfaceTexture.setDefaultBufferSize(resolution.getWidth(), resolution.getHeight());
+                    Surface surface = new Surface(surfaceTexture);
+                    request.provideSurface(surface, ContextCompat.getMainExecutor(getContext()), result -> {
 
-                bindCameraUseCases();
+                    });
+                };
+                // using surfacetexture
+                mPreview = new Preview.Builder().build();
+                mPreview.setSurfaceProvider(surfaceProvider);
+
+
+                // image capture
+                mImageCapture = new ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build();
+
+                // camera using back selector bind to lifecycle
+                /**
+                 * will ultimately be able to select back or front
+                 */
+                CameraSelector cameraSelector =
+                        new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
+
+                /**
+                 * Extensions currently don't work with CameraX libraries
+                 * Issue: ProcessCameraProvider inherited from CameraProvider but
+                 * here the former cannot be passed as the latter
+                 */
+
+                mCamera = mCameraProvider.bindToLifecycle(,
+                        cameraSelector,
+                        mPreview,
+                        mImageCapture);
+
+                Log.d(TAG, "Binding use cases complete");
+                //bindCameraUseCases();
 
             } catch (ExecutionException e) {
                 e.printStackTrace();
@@ -310,8 +355,8 @@ public class HomeFragment extends Fragment {
                 }
             });
 
-            return true;
-            //return false;
+            //return true;
+            return false;
         }
     };
 
@@ -377,12 +422,10 @@ public class HomeFragment extends Fragment {
          * here the former cannot be passed as the latter
          */
 
-        mCamera = mCameraProvider.bindToLifecycle(this,
+        mCamera = mCameraProvider.bindToLifecycle(getViewLifecycleOwner(),
                 cameraSelector,
                 mPreview,
                 mImageCapture);
-
-
 
         Log.d(TAG, "Binding use cases complete");
     }
