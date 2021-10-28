@@ -2,8 +2,11 @@ package com.example.help;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.ui.signIn.SignInActivity;
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getConnectivityStatus(this);
         FirebaseApp.initializeApp(this);
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -73,6 +77,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean isCurrentUserSignedIn() {
         FirebaseUser user = mAuth.getCurrentUser();
         return user != null;
+    }
+
+    public static boolean getConnectivityStatus(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
+
+                return true;
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE)
+                return true;
+        }
+        Toast.makeText(context, "No network connection!", Toast.LENGTH_SHORT).show();
+        return false;
     }
 
 
