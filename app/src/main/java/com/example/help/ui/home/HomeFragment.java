@@ -109,6 +109,7 @@ public class HomeFragment extends Fragment {
     private boolean isAlert = false;
     //private Context safeContext;
     private boolean isFaceUp = false;
+    private SurfaceTexture mSurfaceTexture;
     /**
      * End data for cameraX functions
      *
@@ -122,6 +123,7 @@ public class HomeFragment extends Fragment {
         // I don't know if this should go here, in example it goes in 'onResume()'
         //mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
         //mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
 
 
     }
@@ -144,11 +146,7 @@ public class HomeFragment extends Fragment {
         mHeight = params.height;
         
 
-        /**
-         * Do Camera Setup
-         */
-        mCameraProviderFuture = ProcessCameraProvider.getInstance(getContext());
-        setupCamera(); //setup camera if permission has been granted by user
+
 
 
         imageView2.setOnTouchListener(new View.OnTouchListener() {
@@ -191,11 +189,16 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    /*@Override
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        /**
+         * Do Camera Setup
+         */
+        mCameraProviderFuture = ProcessCameraProvider.getInstance(getContext());
+        setupCamera(); //setup camera if permission has been granted by user
 
-    }*/
+    }
 
     private void endplay() {
 
@@ -230,7 +233,8 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         // now seems to allow close camerax
         binding = null;
-        //mCameraProvider.unbindAll();
+        mSurfaceTexture.release();
+        mCameraProvider.unbindAll();
     }
 
     /**
@@ -263,11 +267,11 @@ public class HomeFragment extends Fragment {
                 }
                 // Just do basic setup and take picture for now
                 // preview
-                SurfaceTexture surfaceTexture = new SurfaceTexture(10);
+                mSurfaceTexture = new SurfaceTexture(10);
                 Preview.SurfaceProvider surfaceProvider = request -> {
                     Size resolution = request.getResolution();
-                    surfaceTexture.setDefaultBufferSize(resolution.getWidth(), resolution.getHeight());
-                    Surface surface = new Surface(surfaceTexture);
+                    mSurfaceTexture.setDefaultBufferSize(resolution.getWidth(), resolution.getHeight());
+                    Surface surface = new Surface(mSurfaceTexture);
                     request.provideSurface(surface, ContextCompat.getMainExecutor(getContext()), result -> {
 
                     });
@@ -295,7 +299,7 @@ public class HomeFragment extends Fragment {
                  * here the former cannot be passed as the latter
                  */
 
-                mCamera = mCameraProvider.bindToLifecycle(,
+                mCamera = mCameraProvider.bindToLifecycle(this,
                         cameraSelector,
                         mPreview,
                         mImageCapture);
