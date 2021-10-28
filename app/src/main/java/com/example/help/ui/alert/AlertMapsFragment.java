@@ -6,7 +6,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -19,13 +18,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.help.R;
-import com.example.help.databinding.ActivityChatBinding;
 import com.example.help.models.Alert;
-import com.example.help.models.Message;
 import com.example.help.ui.alert.alertRoom.AlertRoomActivity;
-import com.example.help.ui.chatRoom.ChatActivity;
-import com.example.help.ui.setting.SettingFragment;
-import com.example.help.util.jsonUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,12 +34,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class AlertMapsFragment extends Fragment {
 
@@ -81,6 +74,8 @@ public class AlertMapsFragment extends Fragment {
             Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 
 
+
+
             // setBounds
             Double padding = 0.001;
             LatLngBounds viewBounds = new LatLngBounds(
@@ -90,9 +85,12 @@ public class AlertMapsFragment extends Fragment {
 
             // get alerts
             Alert[] alerts = new Alert[3];
-            alerts[0] = new Alert( "gaga111", "-33.853", "151.212");
+            alerts[0] = new Alert( "gaga111",  "-33.853", "151.212");
             alerts[1] = new Alert( "gaga222", "-33.853", "151.211");
-            alerts[2] = new Alert( "gaga333", "-33.852", "151.212");
+            alerts[2] = new Alert( "gaga333","-33.852", "151.212");
+
+            // get contact lists
+            List<String> phoneNumbers = Arrays.asList("111", "456", "12332", "", "zzz", "David Price" );
 
             ArrayList <Alert> allAlerts = new ArrayList<>();
             mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -101,15 +99,19 @@ public class AlertMapsFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     for(DataSnapshot d : snapshot.getChildren()) {
-                        Log.d(TAG, "bbb: " + d.getKey());
+                        Log.d(TAG, "dddd: " + d.getKey());
                         HashMap message = (HashMap)snapshot.child(d.getKey()).getChildren().iterator().next().getValue();
-                        Log.d(TAG, "ccc: " + message.get("text"));
                         String location = (String) message.get("text");
-                        Alert a =  new Alert((String) message.get("name"), location.split(" ")[0], location.split(" ")[1]);
-                        googleMap.addMarker(new MarkerOptions()
-                                .position(a.getLocation())
-                                .title(a.getName())
-                                .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                        String number = (String) message.get("name");
+
+                        Log.d(TAG, "phone number: " + number);
+                        if (phoneNumbers.contains(number)) {
+                            Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(a.getLocation())
+                                    .title(a.getName())
+                                    .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                        }
                     }
                 }
                 @Override
@@ -119,11 +121,11 @@ public class AlertMapsFragment extends Fragment {
 
             });
 
-
-
             googleMap.setOnMarkerClickListener(marker -> {
                 Toast.makeText(getContext(), marker.getTitle(), Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getContext(), AlertRoomActivity.class));
+                Intent i = new Intent(getContext(), AlertRoomActivity.class);
+                i.putExtra("name", marker.getTitle());
+                startActivity(i);
                 return true;
             });
 

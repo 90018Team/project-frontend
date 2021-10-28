@@ -99,7 +99,7 @@ public class ChatActivity extends AppCompatActivity {
                     Log.d(TAG, "onDataChange: The room is not found, creating...");
                     Message initMessage = new Message(
                         "TODO: GPS location here",/* TODO: GPS location as text message (or maybe some other form of data?)*/
-                        getUserName(),
+                            getPhoneNumber(),
                         getUserPhotoUrl(),
                         null,/*TODO: camera image file URL*/
                             null/* TODO: voice file URL*/
@@ -316,6 +316,11 @@ public class ChatActivity extends AppCompatActivity {
     private String getUserName(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         return user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
+    }
+
+    private String getPhoneNumber(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user.getPhoneNumber()==null?"ANONYMOUS":user.getPhoneNumber();
     }
     /**
      * Extracts the user typed message from 'R.id.messageEditText' EditText and returns the same.
