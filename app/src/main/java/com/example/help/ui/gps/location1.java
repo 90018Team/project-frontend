@@ -101,15 +101,16 @@ public class location1 extends AppCompatActivity {
                                     }
                                     if (location == null) {
                                         //  textView.setText("happy");
-                                        Toast.makeText(location1.this, "Success", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(location1.this, "null", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
                 }else{
                     turnOnGPS();
-                }}else{
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
-            }
+              }}
+//                else{
+//                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+//            }
         }
 //            }
 //
