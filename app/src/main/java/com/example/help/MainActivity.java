@@ -2,8 +2,11 @@ package com.example.help;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.ui.signIn.SignInActivity;
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getConnectivityStatus(this);
         FirebaseApp.initializeApp(this);
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -39,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Main activity", "onCreate: "+"user not signed in");
             startActivity(new Intent(this,SignInActivity.class));
             finish();
-            return;
         }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -54,22 +57,13 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        // Connect to network (local simulator for debug)
-        // When running in debug mode, connect to the Firebase Emulator Suite.
-        // "10.0.2.2" is a special IP address which allows the Android Emulator
-        // to connect to "localhost" on the host computer. The port values (9xxx)
-        // must match the values defined in the firebase.json file.
-//        if (BuildConfig.DEBUG) {
-//            FirebaseDatabase.getInstance().useEmulator("10.0.2.2", 9000);
-//            FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
-//            FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
-//        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
         if(isCurrentUserSignedIn()){
+            Log.d("Main activity", "onCreate: "+"user has signed in");
             reload();
         }
         else{
@@ -77,17 +71,29 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Main activity", "onCreate: "+"user not signed in");
             startActivity(new Intent(this,SignInActivity.class));
             finish();
-            return;
         }
     }
 
     public boolean isCurrentUserSignedIn() {
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            return true;
-        } else {
-            return false;
+        return user != null;
+    }
+
+    public static boolean getConnectivityStatus(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
+
+                return true;
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE)
+                return true;
         }
+        Toast.makeText(context, "No network connection!", Toast.LENGTH_SHORT).show();
+        return false;
     }
 
 
