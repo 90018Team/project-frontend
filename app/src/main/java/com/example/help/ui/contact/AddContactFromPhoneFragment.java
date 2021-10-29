@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -55,6 +57,7 @@ public class AddContactFromPhoneFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         binding = AddContactFromPhoneBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        this.getActivity().setTitle("Add Contact");
         Log.d(TAG, "Opened.");
 
 
@@ -63,9 +66,8 @@ public class AddContactFromPhoneFragment extends Fragment {
         searchView = root.findViewById(R.id.phone_contacts_search);
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
-        // grab contacts from phone
+
         getPhoneContacts();
-        // populate recyclerview with contacts
         populateRecyclerView(root);
 
         // set search listener
@@ -87,18 +89,7 @@ public class AddContactFromPhoneFragment extends Fragment {
     }
 
 
-
     private void getPhoneContacts() {
-
-        // Check permissions to read contacts
-        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this.getActivity(),
-                    new String[] {Manifest.permission.READ_CONTACTS}, 0);
-            //TODO: Handle if user denies permission
-        }
-
         ContentResolver contentResolver = this.getContext().getContentResolver();
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String sortOrder = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC";
@@ -106,16 +97,15 @@ public class AddContactFromPhoneFragment extends Fragment {
 
         Log.d(TAG, "getPhoneContacts: total # of contacts retrieved from phone: " + Integer.toString(cursor.getCount()));
         if (cursor.getCount() > 0) {
-            while (cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 int nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
                 int phoneIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 Log.d(TAG, "Retreived contact: " + cursor.getString(nameIdx) + ", " + cursor.getString(phoneIdx));
                 phoneContacts.add(new Contact(cursor.getString(nameIdx), cursor.getString(phoneIdx)));
             }
         }
-
-
     }
+
 
     private void populateRecyclerView(View root) {
         Log.d(TAG, "populateRecyclerView: Displaying contacts in RecyclerView");
@@ -139,27 +129,27 @@ public class AddContactFromPhoneFragment extends Fragment {
     public void addContact(String name, String phone) {
         userHelper.addContact(name, phone,
                 new FirestoreUserHelper.SuccessCallback() {
-                                  @Override
-                                  public void onCallback(boolean success) {
-                                      if (success) {
-                                          toastMessage("Contact added!");
-                                          Navigation.findNavController(binding.getRoot()).navigate(R.id.action_add_contact_to_contacts);
-                                          closeKeyboard();
-                                      } else {
-                                          toastMessage("Something went wrong");
-                                      }
-                                  }
-                              });
+                    @Override
+                    public void onCallback(boolean success) {
+                        if (success) {
+                            toastMessage("Contact added!");
+                            Navigation.findNavController(binding.getRoot()).navigate(R.id.action_add_contact_to_contacts);
+                            closeKeyboard();
+                        } else {
+                            toastMessage("Something went wrong");
+                        }
+                    }
+                });
     }
 
     public void toastMessage(String msg) {
         Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void closeKeyboard(){
+    private void closeKeyboard() {
         View view = this.getActivity().getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager)this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
         }

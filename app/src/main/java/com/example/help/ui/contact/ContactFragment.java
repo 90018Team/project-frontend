@@ -1,6 +1,8 @@
 package com.example.help.ui.contact;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,8 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -19,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.help.R;
 import com.example.help.databinding.ContactFragmentBinding;
 import com.example.help.models.Contact;
+import com.example.help.ui.PopUpDialog;
 import com.example.help.ui.signIn.SignInActivity;
 import com.example.help.util.FirestoreUserHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -75,12 +81,22 @@ public class ContactFragment extends Fragment {
 
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Navigation.findNavController(v).navigate(R.id.action_contacts_to_add_contact_from_phone);
+                // Check permissions to access contacts
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) ==
+                        PackageManager.PERMISSION_GRANTED) {
+                    navigateToAddContacts();
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+                }
             }
         });
 
 
         return root;
+    }
+
+    private void navigateToAddContacts(){
+        Navigation.findNavController(binding.getRoot()).navigate(R.id.action_contacts_to_add_contact_from_phone);
     }
 
 
@@ -113,6 +129,23 @@ public class ContactFragment extends Fragment {
                 });
             }
         });
+    }
+
+    private ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    navigateToAddContacts();
+                } else {
+                    openPermissionsRequiredDialog();
+                }
+            });
+
+    private void openPermissionsRequiredDialog() {
+        String title = "Permissions Required";
+        String msg = "HELP! requires permission to access your contacts to add them as emergency contacts.";
+        String buttonText = "ok";
+        PopUpDialog dialog = new PopUpDialog(title, msg, buttonText);
+        dialog.show(getActivity().getSupportFragmentManager(), "permissions required");
     }
 
     public void toastMessage(String msg) {
