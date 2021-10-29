@@ -1,4 +1,4 @@
-package com.example.help.ui.contact;
+package com.example.help.models;
 
 public class Contact {
     private String name;

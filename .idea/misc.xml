@@ -40,6 +40,7 @@
         <entry key="app/src/main/res/layout/phone_contact_row.xml" value="1.2146863759443136" />
         <entry key="app/src/main/res/layout/setting_fragment.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1390625" />
+        <entry key="app/src/main/res/xml/setting_preference.xml" value="0.25" />
       </map>
     </option>
   </component>

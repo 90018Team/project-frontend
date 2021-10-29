@@ -7,17 +7,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.help.R;
+import com.example.help.models.Contact;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class PhoneContactRecyclerAdapter extends RecyclerView.Adapter<PhoneContactRecyclerAdapter.CViewHolder> implements Filterable {
     private static final String TAG = "PhoneContactRecyclerAdapter";
@@ -69,7 +68,6 @@ public class PhoneContactRecyclerAdapter extends RecyclerView.Adapter<PhoneConta
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // When any part of item is clicked, delete (for test)
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {

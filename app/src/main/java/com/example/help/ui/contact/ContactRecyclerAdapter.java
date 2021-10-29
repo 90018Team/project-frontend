@@ -4,14 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.help.R;
-import com.example.help.util.DatabaseHelper;
+import com.example.help.models.Contact;
 
 import java.util.ArrayList;
 
@@ -24,7 +23,7 @@ public class ContactRecyclerAdapter extends RecyclerView.Adapter<ContactRecycler
 
     public interface OnItemClickListener{
         void onClickListener(int position);
-        void onDeleteClick(int position, String contactName);
+        void onDeleteClick(int position, String contactName, String phoneNumber);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -90,7 +89,7 @@ public class ContactRecyclerAdapter extends RecyclerView.Adapter<ContactRecycler
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
-                            listener.onDeleteClick(position, name.getText().toString());
+                            listener.onDeleteClick(position, name.getText().toString(), phoneNumber.getText().toString());
                         }
                     }
                 }

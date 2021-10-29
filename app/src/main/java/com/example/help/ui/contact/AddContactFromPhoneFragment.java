@@ -8,8 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -31,7 +29,9 @@ import android.widget.Toast;
 
 import com.example.help.R;
 import com.example.help.databinding.AddContactFromPhoneBinding;
-import com.example.help.util.DatabaseHelper;
+import com.example.help.models.Contact;
+import com.example.help.util.FirestoreUserHelper;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
@@ -40,7 +40,7 @@ public class AddContactFromPhoneFragment extends Fragment {
 
     private static final String TAG = "AddContactFromPhoneF";
     private AddContactFromPhoneBinding binding;
-    private DatabaseHelper databaseHelper;
+    private FirestoreUserHelper userHelper;
     private ArrayList<Contact> phoneContacts = new ArrayList<>();
     private PhoneContactRecyclerAdapter rAdapter;
     RecyclerView recyclerView;
@@ -58,7 +58,7 @@ public class AddContactFromPhoneFragment extends Fragment {
         Log.d(TAG, "Opened.");
 
 
-        databaseHelper = new DatabaseHelper(this.getContext());
+        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
         recyclerView = root.findViewById(R.id.phone_contact_recycler);
         searchView = root.findViewById(R.id.phone_contacts_search);
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -130,26 +130,26 @@ public class AddContactFromPhoneFragment extends Fragment {
                 // add contact
                 Contact clickedContact = phoneContacts.get(position);
                 Log.d(TAG, "Adding " + clickedContact.getName());
-                boolean succeeded = addContact(clickedContact.getName(), clickedContact.getPhoneNumber());
-                if (succeeded) {
-                    Navigation.findNavController(root).navigate(R.id.action_add_contact_to_contacts);
-                    closeKeyboard();
-                }
+                addContact(clickedContact.getName(), clickedContact.getPhoneNumber());
             }
 
         });
     }
 
-    public boolean addContact(String name, String phone) {
-        boolean dataInserted = databaseHelper.addContact(name, phone);
-
-        if (dataInserted) {
-            toastMessage("Contact added!");
-            return true;
-        } else {
-            toastMessage("Something went wrong");
-            return false;
-        }
+    public void addContact(String name, String phone) {
+        userHelper.addContact(name, phone,
+                new FirestoreUserHelper.SuccessCallback() {
+                                  @Override
+                                  public void onCallback(boolean success) {
+                                      if (success) {
+                                          toastMessage("Contact added!");
+                                          Navigation.findNavController(binding.getRoot()).navigate(R.id.action_add_contact_to_contacts);
+                                          closeKeyboard();
+                                      } else {
+                                          toastMessage("Something went wrong");
+                                      }
+                                  }
+                              });
     }
 
     public void toastMessage(String msg) {

@@ -1,13 +1,12 @@
 package com.example.help.ui.contact;
 
-import android.database.Cursor;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,8 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.help.R;
 import com.example.help.databinding.ContactFragmentBinding;
-import com.example.help.util.DatabaseHelper;
+import com.example.help.models.Contact;
+import com.example.help.ui.signIn.SignInActivity;
+import com.example.help.util.FirestoreUserHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
@@ -30,9 +32,9 @@ public class ContactFragment extends Fragment {
     private ContactViewModel cViewModel;
     private ContactFragmentBinding binding;
     private FloatingActionButton addButton;
-    private DatabaseHelper databaseHelper;
     private ArrayList<Contact> contacts = new ArrayList<>();
     private ContactRecyclerAdapter rAdapter;
+    private FirestoreUserHelper userHelper;
 
 
     RecyclerView recyclerView;
@@ -49,14 +51,26 @@ public class ContactFragment extends Fragment {
         binding = ContactFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        databaseHelper = new DatabaseHelper(this.getContext());
+        // If user isn't signed in, prompt to sign in
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Log.d(TAG, "onCreateView: user not signed in");
+            startActivity(new Intent(this.getContext(), SignInActivity.class));
+            this.getActivity().finish();
+            return root;
+        }
+
+        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
         addButton = (FloatingActionButton) root.findViewById(R.id.addButton);
         recyclerView = root.findViewById(R.id.contact_recycler);
 
-        createContactsFromDb();
-        populateRecyclerView(root);
-
-
+        userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
+            @Override
+            public void onCallback(ArrayList<Contact> contactList) {
+                Log.d(TAG, "onCallback: contacts retrieved");
+                contacts = contactList;
+                populateRecyclerView(root);
+            }
+        });
 
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -65,17 +79,10 @@ public class ContactFragment extends Fragment {
             }
         });
 
+
         return root;
     }
 
-    private void createContactsFromDb() {
-        Log.d(TAG, "createContactsFromDb: getting contacts from db");
-
-        Cursor data = databaseHelper.getContacts();
-        while(data.moveToNext()){
-            contacts.add(new Contact(data.getString(1), data.getString(2)));
-        }
-    }
 
     private void populateRecyclerView(View root) {
         Log.d(TAG, "populateRecyclerView: Displaying contacts in RecyclerView");
@@ -91,16 +98,25 @@ public class ContactFragment extends Fragment {
             }
 
             @Override
-            public void onDeleteClick(int position, String contactName) {
-                removeContact(position);
-                databaseHelper.deleteContactByName(contactName);
+            public void onDeleteClick(int position, String contactName, String phoneNumber) {
+                userHelper.removeContact(contactName, phoneNumber, new FirestoreUserHelper.SuccessCallback() {
+                    @Override
+                    public void onCallback(boolean success) {
+                        if (success) {
+                            toastMessage("Contact removed");
+                            contacts.remove(position);
+                            rAdapter.notifyItemRemoved(position);
+                        } else {
+                            toastMessage("Something went wrong");
+                        }
+                    }
+                });
             }
         });
     }
 
-    public void removeContact(int position) {
-        contacts.remove(position);
-        rAdapter.notifyItemRemoved(position);
+    public void toastMessage(String msg) {
+        Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
