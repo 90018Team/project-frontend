@@ -1,13 +1,19 @@
 package com.example.help;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.example.help.ui.chatRoom.ChatActivity;
+import com.example.help.ui.signIn.SignInActivity;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.BuildConfig;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -15,20 +21,29 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.help.databinding.ActivityMainBinding;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getApplicationContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
-        }else{
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+        getConnectivityStatus(this);
+        FirebaseApp.initializeApp(this);
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+        if(!isCurrentUserSignedIn()){
+            Log.d("Main activity", "onCreate: "+"user not signed in");
+            startActivity(new Intent(this,SignInActivity.class));
+            finish();
         }
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -41,17 +56,49 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-    }
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode==1){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(MainActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
-            }else{
-                Toast.makeText(MainActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
-            }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(isCurrentUserSignedIn()){
+            Log.d("Main activity", "onCreate: "+"user has signed in");
+            reload();
+        }
+        else{
+            // otherwise, login first.
+            Log.d("Main activity", "onCreate: "+"user not signed in");
+            startActivity(new Intent(this,SignInActivity.class));
+            finish();
         }
     }
-}
 
+    public boolean isCurrentUserSignedIn() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        return user != null;
+    }
+
+    public static boolean getConnectivityStatus(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
+
+                return true;
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE)
+                return true;
+        }
+        Toast.makeText(context, "No network connection!", Toast.LENGTH_SHORT).show();
+        return false;
+    }
+
+
+
+    // Caleb: I have no idea why this is needed.
+    // just keep it here, will dig into this later
+    private void reload() { }
+}

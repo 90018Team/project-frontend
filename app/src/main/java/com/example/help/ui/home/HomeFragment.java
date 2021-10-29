@@ -102,7 +102,6 @@ public class HomeFragment extends Fragment {
 
     private void startplay() {
         mHandler.post(new Runnable() {
-
             @Override
             public void run() {
                 if (isClick) {
