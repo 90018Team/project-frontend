@@ -7,6 +7,8 @@
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
+
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/messengerImageView"
         android:layout_width="36dp"
@@ -72,6 +74,17 @@
             app:playProgressbarColor="#ff7700"
             app:shareText="SHARE ME"/>
 
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="229dp"
+            android:layout_height="137dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="73dp"
+            android:layout_marginBottom="247dp"
+            tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
 
         <ImageView
             android:id="@+id/messageImageView"

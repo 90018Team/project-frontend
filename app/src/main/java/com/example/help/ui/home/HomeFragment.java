@@ -96,7 +96,7 @@ public class HomeFragment extends Fragment {
                     if (params.height>=imageView2.getHeight()) {
                         params.height=imageView2.getHeight();
                         Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getContext(), ChatActivity.class));
+                        startActivity(new Intent(getContext(), GatherInfo.class));
                     }else{
                         mHandler.postDelayed(this, 5);
                     }
