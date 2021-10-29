@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -44,6 +45,7 @@ public class ContactFragment extends Fragment {
 
 
     RecyclerView recyclerView;
+    TextView noContactsText;
 
 
     public static ContactFragment newInstance() {
@@ -57,22 +59,20 @@ public class ContactFragment extends Fragment {
         binding = ContactFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // If user isn't signed in, prompt to sign in
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Log.d(TAG, "onCreateView: user not signed in");
-            startActivity(new Intent(this.getContext(), SignInActivity.class));
-            this.getActivity().finish();
-            return root;
-        }
 
         userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
         addButton = (FloatingActionButton) root.findViewById(R.id.addButton);
         recyclerView = root.findViewById(R.id.contact_recycler);
+        noContactsText = root.findViewById(R.id.noContactsText);
+        noContactsText.setVisibility(View.GONE);
 
         userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
             @Override
             public void onCallback(ArrayList<Contact> contactList) {
                 Log.d(TAG, "onCallback: contacts retrieved");
+                if (contactList.size() <= 0) {
+                    noContactsText.setVisibility(View.VISIBLE);
+                }
                 contacts = contactList;
                 populateRecyclerView(root);
             }
@@ -122,6 +122,9 @@ public class ContactFragment extends Fragment {
                             toastMessage("Contact removed");
                             contacts.remove(position);
                             rAdapter.notifyItemRemoved(position);
+                            if (contacts.size() <= 0) {
+                                noContactsText.setVisibility(View.VISIBLE);
+                            }
                         } else {
                             toastMessage("Something went wrong");
                         }
