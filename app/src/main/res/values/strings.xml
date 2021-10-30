@@ -17,11 +17,6 @@
     <string name="app_setting">App settings</string>
     <string name="default_message_title">Default message</string>
 
-    <!--camera buttons-->
-    <string name="capture_button_alt">Capture</string>
-    <string name="switch_camera_button_alt">Switch camera</string>
-    <string name="gallery_button_alt">Gallery</string>
-
     <string name="voice_placeHolder_empty">Voice URL</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
