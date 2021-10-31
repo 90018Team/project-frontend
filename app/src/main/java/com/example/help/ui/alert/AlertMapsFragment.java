@@ -19,10 +19,7 @@ import android.widget.Toast;
 
 import com.example.help.R;
 import com.example.help.models.Alert;
-import com.example.help.ui.alert.alertRoom.AlertRoomActivity;
 import com.example.help.ui.chatRoom.ChatActivity;
-import com.example.help.ui.setting.SettingFragment;
-import com.example.help.util.jsonUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,12 +28,25 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class AlertMapsFragment extends Fragment {
+
+    private static final String TAG = "gagaga";
+    private static String MESSAGES_CHILD = "/emergency_event/";
+    public DatabaseReference mFirebaseDatabaseReference;
+
+
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
         @Override
@@ -56,17 +66,6 @@ public class AlertMapsFragment extends Fragment {
             googleMap.setMyLocationEnabled(true);
 
 
-            // setBounds
-            Double padding = 0.001;
-            LatLngBounds viewBounds = new LatLngBounds(
-                    new LatLng(curLocation.latitude - padding, curLocation.longitude - padding), // SW bounds
-                    new LatLng(curLocation.latitude + padding, curLocation.longitude + padding) // NE bounds
-                    );
-            Alert[] alerts = new Alert[3];
-            alerts[0] = new Alert(1, "gaga111", "-33.853", "151.212");
-            alerts[1] = new Alert(2, "gaga222", "-33.853", "151.211");
-            alerts[2] = new Alert(3, "gaga333", "-33.852", "151.212");
-
             // marker format
             int height = 200;
             int width = 250;
@@ -76,17 +75,58 @@ public class AlertMapsFragment extends Fragment {
 
 
 
-            for(Alert a: alerts) {
-                googleMap.addMarker(new MarkerOptions()
-                        .position(a.getLocation())
-                        .title(a.getName())
-                        .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
-            }
 
+            // setBounds
+            Double padding = 0.001;
+            LatLngBounds viewBounds = new LatLngBounds(
+                    new LatLng(curLocation.latitude - padding, curLocation.longitude - padding), // SW bounds
+                    new LatLng(curLocation.latitude + padding, curLocation.longitude + padding) // NE bounds
+                    );
+
+            // get alerts
+            Alert[] alerts = new Alert[3];
+            alerts[0] = new Alert( "gaga111",  "-33.853", "151.212");
+            alerts[1] = new Alert( "gaga222", "-33.853", "151.211");
+            alerts[2] = new Alert( "gaga333","-33.852", "151.212");
+
+            // get contact lists
+            List<String> phoneNumbers = Arrays.asList("111", "456", "12332", "", "zzz", "David Price" );
+
+            ArrayList <Alert> allAlerts = new ArrayList<>();
+            mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
+            messagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    for(DataSnapshot d : snapshot.getChildren()) {
+                        Log.d(TAG, "dddd: " + d.getKey());
+                        HashMap message = (HashMap)snapshot.child(d.getKey()).getChildren().iterator().next().getValue();
+                        String location = (String) message.get("text");
+                        String number = (String) message.get("name");
+
+                        Log.d(TAG, "phone number: " + number);
+                        if (phoneNumbers.contains(number)) {
+                            Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(a.getLocation())
+                                    .title(a.getName())
+                                    .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                        }
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d(TAG, "onCancelled: Something wrong?");
+                }
+
+            });
 
             googleMap.setOnMarkerClickListener(marker -> {
                 Toast.makeText(getContext(), marker.getTitle(), Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getContext(), AlertRoomActivity.class));
+                Intent i = new Intent(getContext(), ChatActivity.class);
+                i.putExtra("from", "visitor");
+                i.putExtra("name", marker.getTitle());
+                startActivity(i);
                 return true;
             });
 

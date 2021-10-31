@@ -59,14 +59,16 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
-    private HomeViewModel homeViewModel;
+    //private HomeViewModel homeViewModel;
     private HomeFragmentBinding binding;
 
     private View frameLayout1;
@@ -81,7 +83,7 @@ public class HomeFragment extends Fragment {
      *
      */
     // debug string
-    private static final String TAG = "CameraXFragment";
+    private static final String TAG = "HomeFragment";
     private Sensor mRotationOrientationSensor;
     private SensorManager mSensorManager;
 
@@ -106,22 +108,35 @@ public class HomeFragment extends Fragment {
     private Camera mCamera;
     private static final String FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS";
     private static final String PHOTO_EXTENSION = ".jpg";
-    //private enum DeviceFacing {NA, UP, DOWN}
-    //private DeviceFacing isFacing = DeviceFacing.NA;    // default neither up nor down
-    private boolean isAlert = false;
-    //private Context safeContext;
     private boolean isFaceUp = false;
     private SurfaceTexture mSurfaceTexture;
     /**
      * End data for cameraX functions
      *
      */
+
+
+    public HomeFragment() {
+        super(R.layout.home_fragment);
+    }
+
+    public HomeFragment newInstance() {
+        HomeFragment fragment = new HomeFragment();
+
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         // ask for permissions NOW!
         setupPermissions();
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        // I don't know if this should go here, in example it goes in 'onResume()'
+        mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
+        mRotationOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -134,6 +149,7 @@ public class HomeFragment extends Fragment {
         frameLayout1 = root.findViewById(R.id.frameLayout1);
         params = frameLayout1.getLayoutParams();
         mHeight = params.height;
+
 
         imageView2.setOnTouchListener(new View.OnTouchListener() {
 
@@ -188,7 +204,6 @@ public class HomeFragment extends Fragment {
 
     private void startplay() {
         mHandler.post(new Runnable() {
-
             @Override
             public void run() {
                 if (isClick) {
@@ -197,7 +212,7 @@ public class HomeFragment extends Fragment {
 
                         params.height=imageView2.getHeight();
                         Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getContext(), ChatActivity.class));
+                        startActivity(new Intent(getContext(), GatherInfo.class));
                     }else{
                         mHandler.postDelayed(this, 5);
                     }
@@ -218,6 +233,14 @@ public class HomeFragment extends Fragment {
         super.onStop();
         mCameraProvider.unbindAll();
     }
+
+    /*@Override
+    public void onPause() {
+        super.onPause();
+        mCameraProvider.unbindAll();
+    }*/
+
+    /** ------ CameraX methods below ------------------------------------- **/
 
     /**
      * Initialise the camera, the use cases and extensions (if any), set to preview/
@@ -244,7 +267,7 @@ public class HomeFragment extends Fragment {
                 } catch (CameraInfoUnavailableException e) {
                     e.printStackTrace();
                 }
-                // bind use cases
+
                 bindCameraUseCases();
 
             } catch (ExecutionException e) {
@@ -266,10 +289,7 @@ public class HomeFragment extends Fragment {
     private View.OnTouchListener takePhotoOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            // takePicture method of cameraX
-            // check orientation of device
             chooseCameraOnDeviceOrientation();
-
             // get base directory
             File directory = getImageFolder();
             // create a file
@@ -303,24 +323,21 @@ public class HomeFragment extends Fragment {
     private void chooseCameraOnDeviceOrientation() {
         // first unbind camera
         mCameraProvider.unbindAll();
-
-        // listens to the LiveData from the AndroidViewModel
-        homeViewModel.getOrientation().observe(this, isFaceUp -> {
-            try {
-                // default is back camera
-                if (isFaceUp && hasFrontCamera()) {
-                    mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
-                    String msg = "Device is face up";
-                    showToast(msg);
-                } else if (hasBackCamera()){
-                    mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
-                    String msg = "Device is face down";
-                    showToast(msg);
-                } else { throw new CameraInfoUnavailableException("No Camera Available");}
-            } catch (CameraInfoUnavailableException e) {
-                e.printStackTrace();
+        //mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+        try {
+            if (isFaceUp && hasFrontCamera()) {
+                Log.d(TAG, "choose front camera");
+                mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
             }
-        });
+            else if (!isFaceUp && hasBackCamera()) {
+                Log.d(TAG, "choose Back camera");
+                mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+            }
+            else { throw new IllegalStateException("No Camera Available"); }
+        } catch (CameraInfoUnavailableException e) {
+            e.printStackTrace();
+        }
+
         // rebind use cases
         bindCameraUseCases();
     }
@@ -329,8 +346,7 @@ public class HomeFragment extends Fragment {
      * method to declare and bind the CameraX use cases
      */
     private void bindCameraUseCases() {
-        // Just do basic setup and take picture for now
-        // preview
+
         SurfaceTexture mSurfaceTexture = new SurfaceTexture(10);
         Preview.SurfaceProvider surfaceProvider = request -> {
             Size resolution = request.getResolution();
@@ -358,6 +374,7 @@ public class HomeFragment extends Fragment {
                 mImageCapture);
 
         Log.d(TAG, "Binding use cases complete");
+
     }
 
     /**
@@ -449,5 +466,92 @@ public class HomeFragment extends Fragment {
     public void showToast(final String toast) {
         getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show());
     }
+
+    /**
+     * Sensor Event listener to determine whether device (when unattended) is laying face up or face down
+     * in order to support decision to select back or front camera to take auto photo
+     */
+    private final SensorEventListener mRotationalSensorEventListener = new SensorEventListener() {
+
+        /**
+         * Method adapted from Professional Android Sensor Programming - Milette & Stroud 2012
+         */
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            // acquire measurements, determine is up / down
+            float[] rotationMatrix = new float[16];
+            SensorManager.getRotationMatrixFromVector(rotationMatrix,
+                    sensorEvent.values);
+            determineOrientation(rotationMatrix);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+
+        /**
+         * Methods to set member variable isFaceUp for use in auto select front/back camera
+         * in Auto Alert Image Capture event
+         */
+        private void onFaceUp() {
+            if (!isFaceUp) {
+                String msg = "Device is face up";
+                showToast(msg);
+                isFaceUp = true;
+            }
+        }
+
+        private void onFaceDown() {
+            if (isFaceUp) {
+                String msg = "Device is face down";
+                showToast(msg);
+                isFaceUp = false;
+            }
+        }
+        /**
+         * Method adapted from Professional Android Sensor Programming - Milette & Stroud 2012
+         *
+         * @param rotationMatrix The rotation matrix to use if the orientation
+         * calculation
+         */
+        private void determineOrientation(float[] rotationMatrix) {
+            float[] orientationValues = new float[3];
+            SensorManager.getOrientation(rotationMatrix, orientationValues);
+
+            // pitch & roll x & y angles determine whether device is flattish
+            // values determine whether face up or down
+            double pitch = Math.toDegrees(orientationValues[1]);
+            double roll = Math.toDegrees(orientationValues[2]);
+
+            if (pitch <= 10) {
+                if (Math.abs(roll) >= 170) {
+                    onFaceDown();
+                }
+                else if (Math.abs(roll) <= 10) {
+                    onFaceUp();
+                }
+            }
+        }
+
+    };
+
+    /**
+     * Required methods to register and unregister sensor event listener
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(mRotationalSensorEventListener,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
+    @Override
+    public void onPause() {
+        mSensorManager.unregisterListener(mRotationalSensorEventListener);
+        super.onPause();
+    }
+
+
 
 }

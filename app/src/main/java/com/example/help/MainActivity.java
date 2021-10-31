@@ -1,7 +1,9 @@
 package com.example.help;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -14,7 +16,9 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.BuildConfig;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -44,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this,SignInActivity.class));
             finish();
         }
+        String[] PERMISSIONS = new String[] {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (!checkPermissions(MainActivity.this,PERMISSIONS)) {
+            ActivityCompat.requestPermissions(MainActivity.this,PERMISSIONS,1); }
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -95,6 +107,51 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(context, "No network connection!", Toast.LENGTH_SHORT).show();
         return false;
     }
+    private boolean checkPermissions(Context context, String... PERMISSIONS) {
+
+        if (context != null && PERMISSIONS != null) {
+
+            for (String permission: PERMISSIONS){
+
+                if (ActivityCompat.checkSelfPermission(context,permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location Permission is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "Location Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+
+            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Camera Permission is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "Camera Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+            if (grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Audio Permission is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "Audio Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+            if (grantResults[3] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Write Permission is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "Write Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+
+
+        } }
 
 
 
