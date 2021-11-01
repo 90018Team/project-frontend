@@ -1,13 +1,10 @@
 package com.example.help.ui.home;
 
 import static android.content.Context.SENSOR_SERVICE;
-
 import static androidx.core.content.FileProvider.getUriForFile;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
@@ -16,7 +13,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -36,21 +32,15 @@ import androidx.annotation.Nullable;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
-import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.R;
 import com.example.help.databinding.HomeFragmentBinding;
-
 import com.example.help.util.jsonUtil;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -59,9 +49,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -92,7 +80,6 @@ public class HomeFragment extends Fragment {
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{
                     Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             };
 
@@ -133,10 +120,8 @@ public class HomeFragment extends Fragment {
 
         // ask for permissions NOW!
         setupPermissions();
-        // I don't know if this should go here, in example it goes in 'onResume()'
         mSensorManager = (SensorManager)getActivity().getBaseContext().getSystemService(SENSOR_SERVICE);
         mRotationOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-
 
     }
 
@@ -240,6 +225,15 @@ public class HomeFragment extends Fragment {
         mCameraProvider.unbindAll();
     }
 
+    /**
+     * Toast method, primarily used for debugging
+     * @param toast
+     */
+    public void showToast(final String toast) {
+        getActivity().runOnUiThread(() ->
+                Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show());
+    }
+
 
     /** ------ CameraX methods below ------------------------------------- **/
 
@@ -308,13 +302,15 @@ public class HomeFragment extends Fragment {
                     // uri created to send to gatherinfo and chatroom etc.
                     mImageToSendUri = getUriForFile(getContext(), "com.example.help.fileprovider", file);
 
-                    showToast(msg);
+                    //showToast(msg);
                     Log.d(TAG, msg);
+
                 }
                 @Override
                 public void onError(@NonNull ImageCaptureException exception) {
                     String msg = "Pic capture failed : " + exception.getMessage();
-                    showToast(msg);
+                    //showToast(msg);
+                    Log.e(TAG, msg);
                     exception.printStackTrace();
                 }
             });
@@ -323,6 +319,12 @@ public class HomeFragment extends Fragment {
         }
     };
 
+    /**
+     * Method for choosing Back or Front camera in an automated sense ie the camera being context
+     * aware, in that if it is laying face down, its preference is for the back camera,
+     * and if laying face up, its preference is for the front camera
+     * Use Case: Alert Activated, then the user may not have control of the phone, dropped it or other
+     */
     @SuppressLint("RestrictedApi")
     private void chooseCameraOnDeviceOrientation() {
         // first unbind camera
@@ -341,6 +343,8 @@ public class HomeFragment extends Fragment {
         } catch (CameraInfoUnavailableException e) {
             e.printStackTrace();
         }
+
+        Log.d(TAG, "Chosen Camera is: " + mLensFacingChoice);
 
         // rebind use cases
         bindCameraUseCases();
@@ -378,7 +382,6 @@ public class HomeFragment extends Fragment {
                 mImageCapture);
 
         Log.d(TAG, "Binding use cases complete");
-
     }
 
     /**
@@ -463,17 +466,13 @@ public class HomeFragment extends Fragment {
         return mCameraProvider != null && mCameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
     }
 
-    /**
-     * Toast method, primarily used for debugging
-     * @param toast
-     */
-    public void showToast(final String toast) {
-        getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), toast, Toast.LENGTH_LONG).show());
-    }
+
+
+    /**-------------End CameraX Methods & Begin Sensor Methods---------------------------------**/
 
     /**
-     * Sensor Event listener to determine whether device (when unattended) is laying face up or face down
-     * in order to support decision to select back or front camera to take auto photo
+     * Sensor Event listener to determine whether device (when unattended) is laying face up or
+     * face down in order to support decision to select back or front camera to take auto photo
      */
     private final SensorEventListener mRotationalSensorEventListener = new SensorEventListener() {
 
@@ -494,25 +493,6 @@ public class HomeFragment extends Fragment {
 
         }
 
-        /**
-         * Methods to set member variable isFaceUp for use in auto select front/back camera
-         * in Auto Alert Image Capture event
-         */
-        private void onFaceUp() {
-            if (!isFaceUp) {
-                String msg = "Device is face up";
-                showToast(msg);
-                isFaceUp = true;
-            }
-        }
-
-        private void onFaceDown() {
-            if (isFaceUp) {
-                String msg = "Device is face down";
-                showToast(msg);
-                isFaceUp = false;
-            }
-        }
         /**
          * Method adapted from Professional Android Sensor Programming - Milette & Stroud 2012
          *
@@ -535,6 +515,28 @@ public class HomeFragment extends Fragment {
                 else if (Math.abs(roll) <= 10) {
                     onFaceUp();
                 }
+            }
+        }
+
+        /**
+         * Methods to set member variable isFaceUp for use in auto select front/back camera
+         * in Auto Alert Image Capture event
+         */
+        private void onFaceUp() {
+            if (!isFaceUp) {
+                String msg = "Device is face up";
+                //showToast(msg);
+                Log.d(TAG, msg);
+                isFaceUp = true;
+            }
+        }
+
+        private void onFaceDown() {
+            if (isFaceUp) {
+                String msg = "Device is face down";
+                //showToast(msg);
+                Log.d(TAG, msg);
+                isFaceUp = false;
             }
         }
 
