@@ -145,11 +145,12 @@ public class HomeFragment extends Fragment {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         isClick=true;
-                        startplay();
                         /**
                          * CameraX takes picture NOW
                          */
                         view.setOnTouchListener(takePhotoOnTouchListener);
+                        startplay();
+
                         break;
                     case MotionEvent.ACTION_UP:
                         isClick=false;
@@ -219,11 +220,11 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
-    @Override
+   /* @Override
     public void onStop() {
         super.onStop();
         mCameraProvider.unbindAll();
-    }
+    }*/
 
     /**
      * Toast method, primarily used for debugging
@@ -250,7 +251,22 @@ public class HomeFragment extends Fragment {
                  * check if front and/or back cameras exist,
                  * automatically choose back if available
                  */
+
+                // chose back or front camera based on device orientation
                 try {
+                    if (isFaceUp && hasFrontCamera()) {
+                        Log.d(TAG, "choose front camera");
+                        mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
+                    }
+                    else if (!isFaceUp && hasBackCamera()) {
+                        Log.d(TAG, "choose Back camera");
+                        mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
+                    }
+                    else { throw new IllegalStateException("No Camera Available"); }
+                } catch (CameraInfoUnavailableException e) {
+                    e.printStackTrace();
+                }
+               /* try {
                     if (hasBackCamera()) {
                         // already default
                         mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
@@ -261,9 +277,37 @@ public class HomeFragment extends Fragment {
                     else { throw new IllegalStateException("No Camera Available"); }
                 } catch (CameraInfoUnavailableException e) {
                     e.printStackTrace();
-                }
+                }*/
+                //chooseCameraOnDeviceOrientation();
+                SurfaceTexture mSurfaceTexture = new SurfaceTexture(10);
+                Preview.SurfaceProvider surfaceProvider = request -> {
+                    Size resolution = request.getResolution();
+                    mSurfaceTexture.setDefaultBufferSize(resolution.getWidth(), resolution.getHeight());
+                    Surface surface = new Surface(mSurfaceTexture);
+                    request.provideSurface(surface, ContextCompat.getMainExecutor(getContext()), result -> {
 
-                bindCameraUseCases();
+                    });
+                };
+                // using surfacetexture - no ui view needed
+                mPreview = new Preview.Builder().build();
+                mPreview.setSurfaceProvider(surfaceProvider);
+
+                // image capture
+                mImageCapture = new ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build();
+                // select given lens choice
+                CameraSelector cameraSelector =
+                        new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
+
+                mCamera = mCameraProvider.bindToLifecycle(getViewLifecycleOwner(),
+                        cameraSelector,
+                        mPreview,
+                        mImageCapture);
+
+                Log.d(TAG, "Binding use cases complete");
+
+                //bindCameraUseCases();
 
             } catch (ExecutionException e) {
                 e.printStackTrace();
@@ -284,7 +328,7 @@ public class HomeFragment extends Fragment {
     private View.OnTouchListener takePhotoOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            chooseCameraOnDeviceOrientation();
+            //chooseCameraOnDeviceOrientation();
             // get base directory
             File directory = getImageFolder();
             // create a file
@@ -368,6 +412,9 @@ public class HomeFragment extends Fragment {
         mPreview = new Preview.Builder().build();
         mPreview.setSurfaceProvider(surfaceProvider);
 
+        mPreview = new Preview.Builder().build();
+        mPreview.setSurfaceProvider(surfaceProvider);
+
         // image capture
         mImageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
@@ -382,6 +429,7 @@ public class HomeFragment extends Fragment {
                 mImageCapture);
 
         Log.d(TAG, "Binding use cases complete");
+
     }
 
     /**
