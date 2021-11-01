@@ -110,6 +110,7 @@ public class HomeFragment extends Fragment {
     private static final String PHOTO_EXTENSION = ".jpg";
     private boolean isFaceUp = false;
     private SurfaceTexture mSurfaceTexture;
+    private Uri mImageToSendUri;
     /**
      * End data for cameraX functions
      *
@@ -212,7 +213,12 @@ public class HomeFragment extends Fragment {
 
                         params.height=imageView2.getHeight();
                         Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getContext(), GatherInfo.class));
+
+                        Intent intent = new Intent(getContext(), GatherInfo.class);
+
+                        intent.putExtra("mImageToSendUri", mImageToSendUri);
+
+                        startActivity(intent);
                     }else{
                         mHandler.postDelayed(this, 5);
                     }
@@ -234,11 +240,6 @@ public class HomeFragment extends Fragment {
         mCameraProvider.unbindAll();
     }
 
-    /*@Override
-    public void onPause() {
-        super.onPause();
-        mCameraProvider.unbindAll();
-    }*/
 
     /** ------ CameraX methods below ------------------------------------- **/
 
@@ -304,6 +305,9 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                     String msg = "Pic captured at " + file.getAbsolutePath();
+                    // uri created to send to gatherinfo and chatroom etc.
+                    mImageToSendUri = getUriForFile(getContext(), "com.example.help.fileprovider", file);
+
                     showToast(msg);
                     Log.d(TAG, msg);
                 }
