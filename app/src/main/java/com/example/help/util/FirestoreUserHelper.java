@@ -1,5 +1,7 @@
 package com.example.help.util;
 
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,8 @@ public class FirestoreUserHelper {
     private static final String FIELD_CONTACT_LIST = "contactList";
     private static final String KEY_NAME = "name";
     private static final String KEY_PHONE = "phoneNumber";
+    private HandlerThread handlerThread = new HandlerThread("FirestoreThread");
+    private Handler threadHandler;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String userId;
 

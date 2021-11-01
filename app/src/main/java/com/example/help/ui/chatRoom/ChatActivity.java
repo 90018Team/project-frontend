@@ -131,6 +131,7 @@ public class ChatActivity extends AppCompatActivity {
                                 null,/*TODO: camera image file URL*/
                                 null/* TODO: voice file URL*/
                         );
+
                         // Create a child reference and set the user's message at that location
                         finalMessagesRef.child(getUserName())
                                 .push().setValue(initMessage);
@@ -213,6 +214,7 @@ public class ChatActivity extends AppCompatActivity {
             // Clear the input message field for the next message
             mBinding.chatEdit.setText("");
         });
+
         ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 result -> {
                     // Get the URI to the image file selected
