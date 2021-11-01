@@ -1,12 +1,10 @@
 package com.example.help.ui.home;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -33,6 +31,8 @@ import com.example.help.R;
 import com.example.help.databinding.HomeFragmentBinding;
 
 import com.example.help.util.AudioRecorderHelper;
+import com.example.help.util.CameraHelper;
+import com.example.help.util.FirebaseStorageHelper;
 import com.example.help.util.GPSHelper;
 import com.example.help.util.jsonUtil;
 
@@ -55,10 +55,14 @@ public class HomeFragment extends Fragment {
     private double latitude = 0.0;
     private double longitude = 0.0;
     private LocationManager locationManager;
+    private FirebaseStorageHelper storageHelper;
+    private CameraHelper cameraHelper;
 
     private final HandlerThread gpsHandlerThread = new HandlerThread("GPS Handler Thread");
     private final HandlerThread audioHandlerThread = new HandlerThread("Audio Handler Thread");
+    private final HandlerThread cameraHandlerThread = new HandlerThread("Camera Handler Thread");
     private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+
 
     private static final String TAG = "HomeFragment";
 
@@ -73,8 +77,11 @@ public class HomeFragment extends Fragment {
         params = frameLayout1.getLayoutParams();
         mHeight = params.height;
 
+        cameraHelper = new CameraHelper(this);
+        storageHelper = new FirebaseStorageHelper();
         gpsHandlerThread.start();
         audioHandlerThread.start();
+        cameraHandlerThread.start();
 
         imageView2.setOnTouchListener(new View.OnTouchListener() {
 
@@ -137,12 +144,28 @@ public class HomeFragment extends Fragment {
     }
 
     private void alertActivated() {
-        startActivity(new Intent(getContext(), ChatActivity.class));
         Alert emergency = new Alert();
+        // take photo while this fragment is still open
+        cameraHelper.takePhoto(new CameraHelper.UriCallback() {
+            @Override
+            public void onImageCaptured(Uri uri) {
+                // then start chat activity
+                startActivity(new Intent(getContext(), ChatActivity.class));
+                // store and send photo in background thread
+                sendPhoto(uri);
+
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "onFailure: image capture failed.");
+                Toast.makeText(getContext(), "Automatic image capture failed.", Toast.LENGTH_SHORT);
+            }
+        });
+
+        // get and send gps and audio data in background thread
         sendGpsData(emergency);
         sendAudioData(emergency);
-        // TODO
-        // sendCameraData();
 
     }
 
@@ -152,7 +175,6 @@ public class HomeFragment extends Fragment {
         threadHandler.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "run: running thread");
                 gps.getLocation(new GPSHelper.LocationCallback() {
                     @Override
                     public void onCallback(Location location) {
@@ -176,17 +198,16 @@ public class HomeFragment extends Fragment {
 
     private void sendAudioData(Alert emergency){
         AudioRecorderHelper audioRecorder = new AudioRecorderHelper();
-        Handler threadHandler = new Handler(gpsHandlerThread.getLooper());
+        Handler threadHandler = new Handler(audioHandlerThread.getLooper());
         threadHandler.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "run: running thread");
-                audioRecorder.record(new AudioRecorderHelper.FileCallback() {
+                audioRecorder.record(new AudioRecorderHelper.AudioRecordListener() {
                     @Override
-                    public void onFinishRecord(File file) {
+                    public void onFinishRecord(Uri uri) {
                         Log.d(TAG, "onFinishRecord: ");
                         // store file in firebase
-                        audioRecorder.storeFile(file, new AudioRecorderHelper.FilePathCallback() {
+                        storageHelper.storeFile(uri, new FirebaseStorageHelper.StorageListener() {
                             @Override
                             public void onSuccess(String filePath) {
                                 // Send audio recording in chat
@@ -200,6 +221,7 @@ public class HomeFragment extends Fragment {
 
                             @Override
                             public void onFailure() {
+                                Toast.makeText(getContext(), "Automatic voice recording failed.", Toast.LENGTH_SHORT);
                                 Log.d(TAG, "onFailure: Audio recording upload failed.");
                             }
                         });
@@ -209,6 +231,42 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void sendPhoto(Uri uri) {
+        Handler threadHandler = new Handler(cameraHandlerThread.getLooper());
+        threadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                storageHelper.storeFile(uri, new FirebaseStorageHelper.StorageListener() {
+                    @Override
+                    public void onSuccess(String filePath) {
+                        Message chatMessage = new Message();
+                        chatMessage.setImageUrl(filePath);
+                        chatMessage.send();
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Toast.makeText(getContext(), "Automatic image capture failed.", Toast.LENGTH_SHORT);
+                        Log.d(TAG, "onFailure: Photo upload failed.");
+                    }
+                });
+
+            }
+        });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        cameraHelper.onResume();
+
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        cameraHelper.onPause();
+    }
 
 
     @Override
@@ -216,6 +274,7 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         gpsHandlerThread.quit();
         audioHandlerThread.quit();
+        cameraHandlerThread.quit();
         binding = null;
     }
 }

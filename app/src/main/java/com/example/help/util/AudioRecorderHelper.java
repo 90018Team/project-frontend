@@ -1,5 +1,6 @@
 package com.example.help.util;
 
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
@@ -32,7 +33,7 @@ public class AudioRecorderHelper {
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
     }
 
-    public void record(FileCallback callback) {
+    public void record(AudioRecordListener callback) {
         File audioFile = createFile();
         String path = audioFile.getAbsolutePath();
         mediaRecorder.setOutputFile(path);
@@ -50,7 +51,7 @@ public class AudioRecorderHelper {
                     mediaRecorder.reset();
                     mediaRecorder.release();
 
-                    callback.onFinishRecord(audioFile);
+                    callback.onFinishRecord(Uri.fromFile(audioFile));
                 }
             }, MS_TO_RECORD); //<-- Execute code after 15000 ms i.e after 15 Seconds.
 
@@ -68,41 +69,8 @@ public class AudioRecorderHelper {
         return new File(audioDirPath + "/" + System.currentTimeMillis() + ".3pg");
     }
 
-    // TODO: This method probably belongs in a FirebaseStorageHelper class
-    public void storeFile(File file, FilePathCallback callback) {
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
-        Uri fileUri = Uri.fromFile(file);
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        StorageReference fileRef = storageRef.child(userId + "/" + fileUri.getLastPathSegment());
-        UploadTask uploadTask = fileRef.putFile(fileUri);
-
-        // Register observers to listen for when the download is done or if it fails
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Log.d(TAG, "onFailure: file upload failed");
-                callback.onFailure();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-                Log.d(TAG, "onSuccess: file upload succeeded");
-                callback.onSuccess(taskSnapshot.getMetadata().getPath());
-            }
-        });
+    public interface AudioRecordListener {
+        void onFinishRecord(Uri uri);
     }
 
-
-    public interface FileCallback {
-        void onFinishRecord(File file);
-    }
-
-    public interface FilePathCallback {
-        void onSuccess(String filePath);
-        void onFailure();
-    }
 }
