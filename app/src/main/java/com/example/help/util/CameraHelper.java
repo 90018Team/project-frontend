@@ -154,6 +154,15 @@ public class CameraHelper {
                 Log.d(TAG, "Pic captured at " + file.getAbsolutePath());
                 callback.onImageCaptured(mImageToSendUri);
 
+                // unbind use cases so camera can be used again
+                thisFragment.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCameraProvider.unbindAll();
+                    }
+                });
+
+
             }
 
             @Override
