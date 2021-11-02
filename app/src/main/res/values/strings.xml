@@ -16,12 +16,30 @@
     <string name="cancel_the_alert">Cancel The Alert</string>
 
     <!--settings xml-->
-    <string name="string_log_out">LOG OUT</string>
+
+    <!--Category for Alert Settings-->
     <string name="alert_setting">Default Alert Settings</string>
+
+    <string name="message_setting_title">Enable Message</string>
+    <string name="message_setting_summary">Enables default message to be sent with default alert</string>
+
     <string name="default_message_title">Default message</string>
-    <string name="notification_setting">Enable Notifications</string>
-    <string name="notification_summary">Enables default message to be sent with default alert</string>
     <string name="default_message_summary">Message that is sent with the default alert</string>
+
+    <string name="geolocation_setting_title">Enable GPS/Location</string>
+    <string name="geolocation_setting_summary">Enables your current location to be sent with default alert</string>
+
+    <string name="takephoto_setting_title">Enable Automatic Photo Capture</string>
+    <string name="takephoto_setting_summary">Enables a photo to be captured by your device
+        on alert activation. If it is lying face down or face up
+        at the time of opening the alert screen, the camera pointing upwards will be chosen,
+        otherwise the back camera is default. The photo will be sent with default alert</string>
+
+    <string name="recordaudio_setting_title">Enable Auto Audio Recording</string>
+    <string name="recordaudio_setting_summary">Enables 5 seconds of audio to be recorded on alert activation
+        and sent with the default alert</string>
+
+    <string name="string_log_out">LOG OUT</string>
     <string name="voice_placeHolder_empty">Voice URL</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
