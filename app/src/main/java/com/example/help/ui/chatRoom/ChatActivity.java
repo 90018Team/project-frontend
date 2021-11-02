@@ -140,17 +140,6 @@ public class ChatActivity extends AppCompatActivity{
                     }
                     else{
                         Log.d(TAG, "onDataChange: The room is not found, creating...");
-                        Message initMessage = new Message(
-                                "TODO: GPS location here",/* TODO: GPS location as text message (or maybe some other form of data?)*/
-                                getPhoneNumber(),
-                                getUserPhotoUrl(),
-                                null,/*TODO: camera image file URL*/
-                                /* TODO: voice file URL*/audioUrl
-                        );
-
-                        // Create a child reference and set the user's message at that location
-                        finalMessagesRef.child(getUserName())
-                                .push().setValue(initMessage);
                         Log.d(TAG, "onDataChange: room created");
                     }
                 }
