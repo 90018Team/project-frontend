@@ -3,6 +3,7 @@ package com.example.help.ui.contact;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,7 +61,7 @@ public class ContactFragment extends Fragment {
         View root = binding.getRoot();
 
 
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
         addButton = (FloatingActionButton) root.findViewById(R.id.addButton);
         recyclerView = root.findViewById(R.id.contact_recycler);
         noContactsText = root.findViewById(R.id.noContactsText);
@@ -93,6 +94,14 @@ public class ContactFragment extends Fragment {
 
 
         return root;
+    }
+
+    private class RetrieveContacts extends AsyncTask<String, Integer, ArrayList<Contact>> {
+
+        @Override
+        protected ArrayList<Contact> doInBackground(String... strings) {
+            return null;
+        }
     }
 
     private void navigateToAddContacts(){

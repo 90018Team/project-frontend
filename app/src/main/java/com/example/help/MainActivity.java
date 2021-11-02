@@ -31,10 +31,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
+    String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +55,9 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_EXTERNAL_STORAGE};
         if (!checkPermissions(MainActivity.this,PERMISSIONS)) {
             ActivityCompat.requestPermissions(MainActivity.this,PERMISSIONS,1); }
 
@@ -152,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         } }
+
 
 
 
