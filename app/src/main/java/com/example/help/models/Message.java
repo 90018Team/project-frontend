@@ -1,18 +1,32 @@
 package com.example.help.models;
 
+import android.location.Location;
+
+import com.example.help.util.FirestoreUserHelper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class Message {
 
     private String id;
+    private Location location;
     private String text;
     private String name;
     private String photoUrl;
     private String imageUrl;
     private String voiceUrl;
     private String voiceTempPath;
+    protected FirestoreUserHelper userHelper;
+    private static String MESSAGES_CHILD = "/emergency_event/";
+
+    String TAG = "Message";
+
     /**
      * Empty constructor required for Firebase auto data mapping
      */
     public Message() {
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Message(String text, String name, String photoUrl, String imageUrl, String voiceUrl) {
@@ -21,6 +35,7 @@ public class Message {
         this.photoUrl = photoUrl;
         this.imageUrl = imageUrl;
         this.voiceUrl = voiceUrl;
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public String getId() {
@@ -78,4 +93,17 @@ public class Message {
     public void setVoiceTempPath(String voiceTempPath) {
         this.voiceTempPath = voiceTempPath;
     }
+
+    public void send(){
+        FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+getUserName())
+                .push().setValue(this);
+    }
+
+
+    // TODO: Duplicated from chat function - should probably live in FirestoreUserHelper
+    private String getUserName(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
+    }
+
 }

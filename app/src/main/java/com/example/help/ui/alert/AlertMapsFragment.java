@@ -86,8 +86,8 @@ public class AlertMapsFragment extends Fragment {
             // get alerts
             Alert[] alerts = new Alert[3];
             alerts[0] = new Alert( "gaga111",  "-33.853", "151.212");
-            alerts[1] = new Alert( "gaga222", "-33.853", "151.211");
-            alerts[2] = new Alert( "gaga333","-33.852", "151.212");
+            alerts[1] = new Alert( "gaga222", "151.212", "151.211");
+            alerts[2] = new Alert( "gaga333", "-33.852", "151.212");
 
             // get contact lists
             List<String> phoneNumbers = Arrays.asList("111", "456", "12332", "", "zzz", "David Price" );
@@ -108,7 +108,7 @@ public class AlertMapsFragment extends Fragment {
                         if (phoneNumbers.contains(number)) {
                             Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
                             googleMap.addMarker(new MarkerOptions()
-                                    .position(a.getLocation())
+                                    .position(a.getLatLng())
                                     .title(a.getName())
                                     .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
                         }

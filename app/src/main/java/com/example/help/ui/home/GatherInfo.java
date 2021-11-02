@@ -72,29 +72,11 @@ public class GatherInfo extends AppCompatActivity implements OnMapReadyCallback 
     Button play,confirm;
     double latitude;
     double longitude;
-    Uri mImageToSendUri;
-
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gather_info);
-
-
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if (extras == null) {
-                mImageToSendUri = null;
-            } else {
-                mImageToSendUri = (Uri) extras.get("mImageToSendUri");
-            }
-        } else {
-            mImageToSendUri = (Uri) savedInstanceState.getSerializable("mImageToSendUri");
-        }
 
 //        Button and TextView
         time = findViewById(R.id.Time);
