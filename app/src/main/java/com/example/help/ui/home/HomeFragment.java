@@ -338,14 +338,14 @@ public class HomeFragment extends Fragment {
                     // uri created to send to gatherinfo and chatroom etc.
                     mImageToSendUri = getUriForFile(getContext(), "com.example.help.fileprovider", file);
 
-                    showToast(msg);
+                    //showToast(msg);
                     Log.d(TAG, msg);
 
                 }
                 @Override
                 public void onError(@NonNull ImageCaptureException exception) {
                     String msg = "Pic capture failed : " + exception.getMessage();
-                    showToast(msg);
+                    //showToast(msg);
                     Log.e(TAG, msg);
                     exception.printStackTrace();
                 }
