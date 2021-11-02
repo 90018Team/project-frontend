@@ -25,10 +25,17 @@ import com.example.help.R;
 import com.example.help.databinding.ActivityChatBinding;
 import com.example.help.models.Alert;
 import com.example.help.models.Message;
+import com.example.help.ui.home.GatherInfo;
 import com.example.help.ui.signIn.SignInActivity;
 import com.example.help.util.FirestoreUserHelper;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -63,15 +70,15 @@ import com.google.firebase.storage.UploadTask;
  * @Note: photoURL is not used currently, this is the one to set users avatar, a trivial data.
  * use null for photoURL, or call getUserPhotoUrl() here
  * */
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity{
     private static final String TAG = "ChatActivity";
     private static String MESSAGES_CHILD = "/emergency_event/"; //it is the 'topic' that we subscribe in the real-time db
     private ActivityChatBinding mBinding;
     private String imageUri = null;
     private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
     private Boolean isVisitor = false;
-    private Alert alert;
     private FirestoreUserHelper userHelper;
+
 
     private  LinearLayout chatTop, chatBot;
 
@@ -120,6 +127,8 @@ public class ChatActivity extends AppCompatActivity {
         * */
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+
+
         DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
         if (!isVisitor) {
             DatabaseReference finalMessagesRef = messagesRef;
@@ -136,7 +145,7 @@ public class ChatActivity extends AppCompatActivity {
                                 getPhoneNumber(),
                                 getUserPhotoUrl(),
                                 null,/*TODO: camera image file URL*/
-                                null/* TODO: voice file URL*/
+                                /* TODO: voice file URL*/audioUrl
                         );
 
                         // Create a child reference and set the user's message at that location
@@ -222,6 +231,7 @@ public class ChatActivity extends AppCompatActivity {
             mBinding.chatEdit.setText("");
         });
 
+
         ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 result -> {
                     // Get the URI to the image file selected
@@ -276,6 +286,7 @@ public class ChatActivity extends AppCompatActivity {
                                 });
                     }
                     else if(mime.matches("audio(.*)")){
+
 
                         Log.d(TAG, "onCreate: In audio upload function");
                         final Uri audioUri = result;
@@ -388,6 +399,7 @@ public class ChatActivity extends AppCompatActivity {
         return null;
     }
 
+
     /**
      * Uploads the Image {@code imageUri} selected by the user to the {@code storageReference} pointed
      * to by the {@code databaseKey}, retrieves the URI to this uploaded file, and then
@@ -469,4 +481,13 @@ public class ChatActivity extends AppCompatActivity {
         // Note: the Firestore does NOT support delete dir, I will do this on the server side by cloud function code.
         // why: I want to delete all audio and videos in this room when user cancel the alert
     }
+
+//    @Override
+//    public void onMapReady(@NonNull GoogleMap googleMap) {
+//        LatLng curPosition = new LatLng(latitude, longitude);
+//        googleMap.addMarker(new MarkerOptions()
+//                .position(curPosition)
+//                .title("Current Position"));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(curPosition));
+//    }
 }

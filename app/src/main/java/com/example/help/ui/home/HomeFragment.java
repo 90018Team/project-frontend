@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,9 +28,14 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.help.models.Alert;
 import com.example.help.models.Message;
 
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.help.ui.chatRoom.ChatActivity;
 import com.example.help.R;
 import com.example.help.databinding.HomeFragmentBinding;
+
 
 import com.example.help.util.AudioRecorderHelper;
 import com.example.help.util.CameraHelper;
@@ -39,6 +45,10 @@ import com.example.help.util.GPSHelper;
 import com.example.help.util.jsonUtil;
 
 
+
+import com.example.help.util.jsonUtil;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,7 +60,7 @@ public class HomeFragment extends Fragment {
 
     private View frameLayout1;
     private ImageView imageView2;
-    private Handler mHandler = new Handler();
+    private Handler mHandler=new Handler();
     private ViewGroup.LayoutParams params;
     private int mHeight;
     private boolean isClick;
@@ -93,11 +103,11 @@ public class HomeFragment extends Fragment {
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        isClick = true;
+                        isClick=true;
                         startplay();
                         break;
                     case MotionEvent.ACTION_UP:
-                        isClick = false;
+                        isClick=false;
                         endplay();
                         break;
 
@@ -111,7 +121,7 @@ public class HomeFragment extends Fragment {
         });
 
         try {
-            JSONObject object = new JSONObject(jsonUtil.getJSON(getContext(), "getData.json"));
+            JSONObject object = new JSONObject(jsonUtil.getJSON(getContext(),"getData.json"));
             Log.d("gaga", "onCreateView: " + object.getString("message"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -123,7 +133,7 @@ public class HomeFragment extends Fragment {
 
     private void endplay() {
 
-        params.height = mHeight;
+        params.height=mHeight;
         frameLayout1.setLayoutParams(params);
     }
 
