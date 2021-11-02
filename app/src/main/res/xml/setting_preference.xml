@@ -7,13 +7,14 @@
         app:title="@string/alert_setting">
 
         <SwitchPreferenceCompat
-            app:key="notifications"
+            app:key="message"
             app:title="@string/notification_setting"
             app:summary="@string/notification_summary" />
             <EditTextPreference
                 app:key="defaultmessagetext"
                 app:title="@string/default_message_title"
                 app:summary="@string/default_message_summary" />
+
         <Preference
             app:key="logout"
             app:title="@string/string_log_out"
