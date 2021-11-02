@@ -5,7 +5,7 @@
     <string name="title_contacts">Contacts</string>
     <string name="title_setting">Setting</string>
     <string name="sos">SOS</string>
-    <string name="warning_message">Warning: !!!!!!!!!!!!!!!!!!!!!</string>
+    <string name="warning_message">Press and hold the red button to send an emergency alert to your contacts.</string>
     <string name="send">Send</string>
     <string name="photo">Photo</string>
     <string name="image">Image</string>
