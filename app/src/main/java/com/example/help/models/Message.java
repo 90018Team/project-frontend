@@ -32,7 +32,7 @@ public class Message {
      * Empty constructor required for Firebase auto data mapping
      */
     public Message() {
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Message(String text, String name, String photoUrl, String imageUrl, String voiceUrl) {
@@ -41,7 +41,7 @@ public class Message {
         this.photoUrl = photoUrl;
         this.imageUrl = imageUrl;
         this.voiceUrl = voiceUrl;
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public String getId() {

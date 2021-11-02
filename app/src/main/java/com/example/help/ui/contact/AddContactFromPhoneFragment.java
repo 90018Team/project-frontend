@@ -61,7 +61,7 @@ public class AddContactFromPhoneFragment extends Fragment {
         Log.d(TAG, "Opened.");
 
 
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
         recyclerView = root.findViewById(R.id.phone_contact_recycler);
         searchView = root.findViewById(R.id.phone_contacts_search);
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);

@@ -1,6 +1,8 @@
 package com.example.help.models;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.util.Log;
 
@@ -14,8 +16,6 @@ import java.util.ArrayList;
 public class Alert {
     private String name;
     private Location location;
-    private String audioUrl; // automatic audio recording on alert
-    private String imageUrl; // automatic photo taken on alert
     private final FirestoreUserHelper userHelper;
 
     private static final String TAG = "Alert";
@@ -25,7 +25,7 @@ public class Alert {
         this.location = new Location("latitude,longitude");
         location.setLatitude(latitude);
         location.setLongitude(longitude);
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Alert(String name, String latitude, String longitude) {
@@ -33,20 +33,19 @@ public class Alert {
         this.location = new Location("latitude,longitude");
         location.setLatitude(Float.parseFloat(latitude));
         location.setLongitude(Float.parseFloat(longitude));
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
 
     public Alert(String name, Location location) {
         this.name = name;
         this.location = location;
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Alert() {
-        userHelper = new FirestoreUserHelper(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userHelper = FirestoreUserHelper.getInstance();
     }
-
 
     public String getName() {
         return name;
@@ -68,22 +67,6 @@ public class Alert {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
-    public void setImageUrl(String url) {
-        this.imageUrl = url;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setAudioUrl(String audioUrl) {
-        this.audioUrl = audioUrl;
-    }
-
-    public String getAudioUrl() {
-        return audioUrl;
-    }
-
     public String getGoogleMapsLink() {
         if (location != null) {
             String link = "http://maps.google.com/?q=";
@@ -94,7 +77,7 @@ public class Alert {
         return null;
     }
 
-    private String getTextMessage() {
+    public String getTextMessage() {
         // Note: SMS char limit is 160
         String msg = "";
         msg += "This message was sent from the HELP! app. \n\n";
@@ -103,17 +86,4 @@ public class Alert {
         return msg;
     }
 
-    public void sendSMSToContacts(){
-        SmsManager smsManager = SmsManager.getDefault();
-        userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
-            @Override
-            public void onCallback(ArrayList<Contact> contacts) {
-                // for every contact in contacts, send sms
-                Log.d(TAG, "onCallback: sending SMS to contacts -> " + getTextMessage());
-                for (Contact contact : contacts) {
-                    smsManager.sendTextMessage(contact.getPhoneNumber(), null, getTextMessage(), null, null);
-                }
-            }
-        });
-    }
 }

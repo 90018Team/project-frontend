@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,6 +34,7 @@ import com.example.help.databinding.HomeFragmentBinding;
 import com.example.help.util.AudioRecorderHelper;
 import com.example.help.util.CameraHelper;
 import com.example.help.util.FirebaseStorageHelper;
+import com.example.help.util.FirestoreUserHelper;
 import com.example.help.util.GPSHelper;
 import com.example.help.util.jsonUtil;
 
@@ -57,6 +59,7 @@ public class HomeFragment extends Fragment {
     private LocationManager locationManager;
     private FirebaseStorageHelper storageHelper;
     private CameraHelper cameraHelper;
+    private FirestoreUserHelper userHelper;
 
     private final HandlerThread gpsHandlerThread = new HandlerThread("GPS Handler Thread");
     private final HandlerThread audioHandlerThread = new HandlerThread("Audio Handler Thread");
@@ -79,6 +82,7 @@ public class HomeFragment extends Fragment {
 
         cameraHelper = new CameraHelper(this);
         storageHelper = new FirebaseStorageHelper();
+        userHelper = FirestoreUserHelper.getInstance();
         gpsHandlerThread.start();
         audioHandlerThread.start();
         cameraHandlerThread.start();
@@ -144,7 +148,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void alertActivated() {
-        Alert emergency = new Alert();
+        Alert alert = new Alert();
         // take photo while this fragment is still open
         cameraHelper.takePhoto(new CameraHelper.UriCallback() {
             @Override
@@ -153,7 +157,6 @@ public class HomeFragment extends Fragment {
                 startActivity(new Intent(getContext(), ChatActivity.class));
                 // store and send photo in background thread
                 sendPhoto(uri);
-
             }
 
             @Override
@@ -164,8 +167,8 @@ public class HomeFragment extends Fragment {
         });
 
         // get and send gps and audio data in background thread
-        sendGpsData(emergency);
-        sendAudioData(emergency);
+        sendGpsData(alert);
+        sendAudioData(alert);
 
     }
 
@@ -181,7 +184,7 @@ public class HomeFragment extends Fragment {
                         Log.d(TAG, "onCallback: location retrieved");
                         // set location of alert and send sms to contacts with geolink
                         emergency.setLocation(location);
-                        emergency.sendSMSToContacts();
+                        userHelper.sendSMSToContacts(emergency.getTextMessage());
 
                         // send location in chat
                         Message chatMessage = new Message();

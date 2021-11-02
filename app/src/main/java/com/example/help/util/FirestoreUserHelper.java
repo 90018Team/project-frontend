@@ -2,6 +2,7 @@ package com.example.help.util;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -27,6 +29,8 @@ import java.util.Map;
 
 public class FirestoreUserHelper {
     private static final String TAG = "FirestoreUserHelper";
+
+    private static volatile FirestoreUserHelper instance;
     private static final String COLLECTION_USERS = "users";
     private static final String FIELD_CONTACT_LIST = "contactList";
     private static final String KEY_NAME = "name";
@@ -37,9 +41,23 @@ public class FirestoreUserHelper {
     private String userId;
 
 
-    public FirestoreUserHelper(String userId) {
+
+    private FirestoreUserHelper() {
+        this.userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d(TAG, "FirestoreUserHelper: uid is " + userId);
-        this.userId = userId;
+    }
+
+    public static FirestoreUserHelper getInstance() {
+        FirestoreUserHelper result = instance;
+        if (result != null) {
+            return result;
+        }
+        synchronized(FirestoreUserHelper.class) {
+            if (instance == null) {
+                instance = new FirestoreUserHelper();
+            }
+            return instance;
+        }
     }
 
 
@@ -136,6 +154,20 @@ public class FirestoreUserHelper {
         contact.put(KEY_NAME, name);
         contact.put(KEY_PHONE, phoneNumber);
         return contact;
+    }
+
+    public void sendSMSToContacts(String msg){
+        SmsManager smsManager = SmsManager.getDefault();
+        retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
+            @Override
+            public void onCallback(ArrayList<Contact> contacts) {
+                // for every contact in contacts, send sms
+                Log.d(TAG, "onCallback: sending SMS to contacts -> " + msg);
+                for (Contact contact : contacts) {
+                    smsManager.sendTextMessage(contact.getPhoneNumber(), null, msg, null, null);
+                }
+            }
+        });
     }
 
     public interface SuccessCallback {
