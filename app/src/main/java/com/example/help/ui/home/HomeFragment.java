@@ -5,7 +5,6 @@ import static androidx.core.content.FileProvider.getUriForFile;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
@@ -198,13 +197,13 @@ public class HomeFragment extends Fragment {
                     if (params.height>=imageView2.getHeight()) {
 
                         params.height=imageView2.getHeight();
-                        Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
+                        /*Toast.makeText(getContext(), "start", Toast.LENGTH_SHORT).show();
 
                         Intent intent = new Intent(getContext(), GatherInfo.class);
 
                         intent.putExtra("mImageToSendUri", mImageToSendUri);
 
-                        startActivity(intent);
+                        startActivity(intent);*/
                     }else{
                         mHandler.postDelayed(this, 5);
                     }
@@ -252,6 +251,14 @@ public class HomeFragment extends Fragment {
                  * automatically choose back if available
                  */
 
+                // Set up the view finder use case to display camera preview
+                mPreview = new Preview.Builder().build();
+
+                // image capture
+                mImageCapture = new ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build();
+
                 // chose back or front camera based on device orientation
                 try {
                     if (isFaceUp && hasFrontCamera()) {
@@ -266,20 +273,19 @@ public class HomeFragment extends Fragment {
                 } catch (CameraInfoUnavailableException e) {
                     e.printStackTrace();
                 }
-               /* try {
-                    if (hasBackCamera()) {
-                        // already default
-                        mLensFacingChoice = CameraSelector.LENS_FACING_BACK;
-                    }
-                    else if (hasFrontCamera()) {
-                        mLensFacingChoice = CameraSelector.LENS_FACING_FRONT;
-                    }
-                    else { throw new IllegalStateException("No Camera Available"); }
-                } catch (CameraInfoUnavailableException e) {
-                    e.printStackTrace();
-                }*/
-                //chooseCameraOnDeviceOrientation();
+
+                // select given lens choice
+                CameraSelector cameraSelector =
+                        new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
+
+                mCamera = mCameraProvider.bindToLifecycle(getViewLifecycleOwner(),
+                        cameraSelector,
+                        mPreview,
+                        mImageCapture);
+
+                // SurfaceTexture output for preview
                 SurfaceTexture mSurfaceTexture = new SurfaceTexture(10);
+
                 Preview.SurfaceProvider surfaceProvider = request -> {
                     Size resolution = request.getResolution();
                     mSurfaceTexture.setDefaultBufferSize(resolution.getWidth(), resolution.getHeight());
@@ -289,21 +295,7 @@ public class HomeFragment extends Fragment {
                     });
                 };
                 // using surfacetexture - no ui view needed
-                mPreview = new Preview.Builder().build();
                 mPreview.setSurfaceProvider(surfaceProvider);
-
-                // image capture
-                mImageCapture = new ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .build();
-                // select given lens choice
-                CameraSelector cameraSelector =
-                        new CameraSelector.Builder().requireLensFacing(mLensFacingChoice).build();
-
-                mCamera = mCameraProvider.bindToLifecycle(getViewLifecycleOwner(),
-                        cameraSelector,
-                        mPreview,
-                        mImageCapture);
 
                 Log.d(TAG, "Binding use cases complete");
 
@@ -346,14 +338,14 @@ public class HomeFragment extends Fragment {
                     // uri created to send to gatherinfo and chatroom etc.
                     mImageToSendUri = getUriForFile(getContext(), "com.example.help.fileprovider", file);
 
-                    //showToast(msg);
+                    showToast(msg);
                     Log.d(TAG, msg);
 
                 }
                 @Override
                 public void onError(@NonNull ImageCaptureException exception) {
                     String msg = "Pic capture failed : " + exception.getMessage();
-                    //showToast(msg);
+                    showToast(msg);
                     Log.e(TAG, msg);
                     exception.printStackTrace();
                 }
