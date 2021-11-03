@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.help.ui.home.GatherInfo;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -59,15 +60,20 @@ public class GPSHelper {
                         @Override
                         public void onComplete(@NonNull Task<Location> task) {
                             Location location = task.getResult();
-                            callback.onCallback(location);
-
+                            if (location != null) {
+                                callback.onCallback(location);
+                            }else{
+                                Toast.makeText(activity, "Location is null, please try again", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
         } catch (SecurityException e) {
             Log.d(TAG, "getLocation: location permission not granted");
-            // TODO
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION}, 44);
         }
     }
+
 
     public String getAddress(Location location) {
         try {

@@ -29,7 +29,7 @@ public class AudioRecorderHelper {
     public AudioRecorderHelper() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
     }
 
@@ -65,6 +65,7 @@ public class AudioRecorderHelper {
         File audioDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "HELP_voice_recordings");
         audioDir.mkdirs();
         String audioDirPath = audioDir.getAbsolutePath();
+        Log.d(TAG,"File path is:"+audioDirPath);
 
         return new File(audioDirPath + "/" + System.currentTimeMillis() + ".3pg");
     }
