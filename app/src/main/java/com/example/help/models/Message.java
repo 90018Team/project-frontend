@@ -11,7 +11,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Message {
 
@@ -23,7 +25,8 @@ public class Message {
     private String imageUrl;
     private String voiceUrl;
     private String voiceTempPath;
-    protected FirestoreUserHelper userHelper;
+    private Date timeStamp;
+    protected FirestoreUserHelper userHelper = FirestoreUserHelper.getInstance();
     private static String MESSAGES_CHILD = "/emergency_event/";
 
     String TAG = "Message";
@@ -32,7 +35,8 @@ public class Message {
      * Empty constructor required for Firebase auto data mapping
      */
     public Message() {
-        userHelper = FirestoreUserHelper.getInstance();
+        timeStamp = new Date();
+        name = userHelper.getUserName();
     }
 
     public Message(String text, String name, String photoUrl, String imageUrl, String voiceUrl) {
@@ -41,7 +45,7 @@ public class Message {
         this.photoUrl = photoUrl;
         this.imageUrl = imageUrl;
         this.voiceUrl = voiceUrl;
-        userHelper = FirestoreUserHelper.getInstance();
+        timeStamp = new Date();
     }
 
     public String getId() {
@@ -100,16 +104,22 @@ public class Message {
         this.voiceTempPath = voiceTempPath;
     }
 
-    public void send(){
-        FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+getUserName())
-                .push().setValue(this);
+//    public void setTimeStamp(){
+//        timeStamp = new Date();
+//    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
     }
 
+    public String getTimeStampStr(){
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        return formatter.format(timeStamp);
+    }
 
-    // TODO: Duplicated from chat function - should probably live in FirestoreUserHelper
-    private String getUserName(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        return user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
+    public void send(){
+        FirebaseDatabase.getInstance().getReference().child(MESSAGES_CHILD+name)
+                .push().setValue(this);
     }
 
 }
