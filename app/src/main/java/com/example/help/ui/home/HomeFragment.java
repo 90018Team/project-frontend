@@ -62,10 +62,10 @@ public class HomeFragment extends Fragment {
 
     SharedPreferences sharedPrefs;
     String defaultMessageText = "I am in distress and need assistance. ";
-    boolean isSendMessageText = false;
-    boolean isTakePhoto = false;
-    boolean isGeoLocation = false;
-    boolean isRecordAudio = false;
+    boolean isSendMessageText = true;
+    boolean isTakePhoto = true;
+    boolean isGeoLocation = true;
+    boolean isRecordAudio = true;
 
     private static final String TAG = "HomeFragment";
 
@@ -77,7 +77,7 @@ public class HomeFragment extends Fragment {
 
         // shared preferences read from settings page and toggles and the default message entered
         // If no text entered default message "I am in distress and need assistance. " is used
-        // all default booleans are false
+        // all default booleans are true
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         defaultMessageText = sharedPrefs.getString("defaultmessagetext", defaultMessageText);
         isSendMessageText = sharedPrefs.getBoolean("message", isSendMessageText);

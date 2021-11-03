@@ -9,7 +9,8 @@
         <SwitchPreferenceCompat
             app:key="message"
             app:title="@string/message_setting_title"
-            app:summary="@string/message_setting_summary" />
+            app:summary="@string/message_setting_summary"
+            app:defaultValue="true"/>
             <EditTextPreference
                 app:key="defaultmessagetext"
                 app:title="@string/default_message_title"
@@ -17,15 +18,18 @@
         <SwitchPreferenceCompat
             app:key="geolocation"
             app:title="@string/geolocation_setting_title"
-            app:summary="@string/geolocation_setting_summary"/>
+            app:summary="@string/geolocation_setting_summary"
+            app:defaultValue="true"/>
         <SwitchPreferenceCompat
             app:key="takephoto"
             app:title="@string/takephoto_setting_title"
-            app:summary="@string/takephoto_setting_summary"/>
+            app:summary="@string/takephoto_setting_summary"
+            app:defaultValue="true"/>
         <SwitchPreferenceCompat
             app:key="recordaudio"
             app:title="@string/recordaudio_setting_title"
-            app:summary="@string/recordaudio_setting_summary"/>
+            app:summary="@string/recordaudio_setting_summary"
+            app:defaultValue="true"/>
 
         <Preference
             app:key="logout"
