@@ -24,7 +24,7 @@
     <string name="message_setting_summary">Enables default message to be sent with default alert</string>
 
     <string name="default_message_title">Default message</string>
-    <string name="default_message_summary">Message that is sent with the default alert</string>
+    <string name="default_message_summary">Short message that is sent with the default alert</string>
 
     <string name="geolocation_setting_title">Enable GPS/Location</string>
     <string name="geolocation_setting_summary">Enables your current location to be sent with default alert</string>

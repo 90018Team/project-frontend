@@ -1,14 +1,12 @@
 package com.example.help.ui.setting;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.example.help.MainActivity;
 import com.example.help.R;
@@ -19,9 +17,6 @@ import com.google.android.gms.tasks.Task;
 
 public class SettingFragment extends PreferenceFragmentCompat {
     private final String TAG = "Setting fragment";
-    SharedPreferences sharedPrefs;
-    private Preference messageToggle;
-    //private Preference geolocationToggle;
     
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -32,15 +27,6 @@ public class SettingFragment extends PreferenceFragmentCompat {
             return true;
         });
 
-        messageToggle = findPreference("message");
-
-
-
-        // get shared preferences
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        //EditTextPreference defaultMessagePreference = findPreference("default message");
-        // TODO: do something with default message preference
     }
     private void signOut() {
         AuthUI.getInstance().signOut(this.getContext()).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -53,6 +39,16 @@ public class SettingFragment extends PreferenceFragmentCompat {
 
     }
 
+    /**
+     * Preference Onchange Listener for reference to listen to change in UI
+     */
+    private Preference.OnPreferenceChangeListener changeListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            //Log.d(TAG, newValue.toString());
+            return true;
+        }
 
+    };
 
 }
