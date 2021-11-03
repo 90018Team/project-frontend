@@ -13,23 +13,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/theme_red"
-        android:clickable="true"
-        android:src="@android:drawable/ic_input_add"
-        android:tint="#FFFFFF"
-        app:fabCustomSize="60dp"
-        app:fabSize="auto"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="60dp" />
-
     <TextView
         android:id="@+id/noContactsText"
         android:layout_width="wrap_content"
@@ -37,8 +20,31 @@
         android:text="You currently have no emergency contacts."
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.58"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/contact_recycler" />
+        app:layout_constraintTop_toBottomOf="@+id/contact_recycler"
+        app:layout_constraintVertical_bias="0.212" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="240dp"
+        android:backgroundTint="@color/theme_red"
+        android:clickable="true"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="#FFFFFF"
+        app:fabCustomSize="60dp"
+        app:fabSize="auto"
+        app:maxImageSize="60dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

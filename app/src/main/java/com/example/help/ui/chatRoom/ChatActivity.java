@@ -145,7 +145,7 @@ public class ChatActivity extends AppCompatActivity{
                                 getPhoneNumber(),
                                 getUserPhotoUrl(),
                                 null,/*TODO: camera image file URL*/
-                                /* TODO: voice file URL*/audioUrl
+                                /* TODO: voice file URL*/null
                         );
 
                         // Create a child reference and set the user's message at that location
