@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.help.MainActivity;
+import com.example.help.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
@@ -82,6 +83,7 @@ public class SignInActivity extends AppCompatActivity {
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
                 .setIsSmartLockEnabled(false)
+                .setTheme(R.style.LoginTheme)
                 .build();
         signInLauncher.launch(signInIntent);
     }
