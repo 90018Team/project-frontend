@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.example.help.MainActivity;
 import com.example.help.R;
 import com.example.help.ui.chatRoom.ChatActivity;
+import com.example.help.ui.gps.location1;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -203,6 +204,8 @@ public class GatherInfo extends AppCompatActivity implements OnMapReadyCallback 
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Location is null, please try again", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
