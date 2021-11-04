@@ -78,6 +78,7 @@
             app:visualizationPlayedColor="#ff7700" />
 
 
+
         <!--        <androidx.fragment.app.FragmentContainerView-->
         <!--            android:id="@+id/map"-->
         <!--            android:name="com.google.android.gms.maps.SupportMapFragment"-->
@@ -88,8 +89,7 @@
         <!--            android:layout_marginStart="73dp"-->
         <!--            android:layout_marginBottom="247dp"-->
         <!--            tools:context="com.example.mapwithmarker.MapsMarkerActivity" />-->
-
-        <ImageView
+<ImageView
             android:id="@+id/messageImageView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

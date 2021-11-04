@@ -71,5 +71,7 @@
             android:textColor="@color/theme_red_dark"
             android:textSize="18sp" />
 
+
+
     </LinearLayout>
 </LinearLayout>

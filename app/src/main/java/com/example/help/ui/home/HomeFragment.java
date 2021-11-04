@@ -47,8 +47,6 @@ import com.example.help.util.jsonUtil;
 
 
 import com.example.help.util.jsonUtil;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -203,8 +201,7 @@ public class HomeFragment extends Fragment {
                         String txt = "I am in distress and need assistance. ";
                         txt += "My location is " + gps.getAddress(location);
 
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        chatMessage.setId( user.getPhoneNumber()+ " " + location.getLatitude() + " " + location.getLongitude());
+                        chatMessage.setId( userHelper.getPhoneNumber()+ " " + location.getLatitude() + " " + location.getLongitude());
                         chatMessage.setText(txt);
                         chatMessage.send();
                     }
