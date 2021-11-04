@@ -87,8 +87,15 @@ public class MessageHolder extends RecyclerView.ViewHolder {
                     .fallback(R.drawable.ic_account_circle_black_36dp)
                     .into(mBinding.messengerImageView);
 
+
+        }
+        if (friendlyMessage.getName() != null) {
             // Set the messenger's name
             mBinding.messengerTextView.setText(friendlyMessage.getName());
+        }
+        if (friendlyMessage.getTimeStampStr() != null) {
+            // set the timestamp
+            mBinding.timeStampTextView.setText(friendlyMessage.getTimeStampStr());
         }
     }
 }
