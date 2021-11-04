@@ -128,7 +128,7 @@ public class GPSHelper {
                     .addOnCompleteListener(activity, new OnCompleteListener<Location>() {
                         @Override
                         public void onComplete(@NonNull Task<Location> task) {
-                            Location location = task.getResult();
+                            location = task.getResult();
                             if (location != null) {
                                 locationDataCallback.onDataCallback(location);
                                 Log.d(TAG,"location successful got:"+location.toString());
@@ -157,23 +157,37 @@ public class GPSHelper {
                 });
     }
 
-    public String getAddress(Location location) {
+//    public String getAddress(Location location) {
+//
+//        if (location != null) {
+//            try {
+//                Geocoder geocoder = new Geocoder(activity,
+//                        Locale.getDefault());
+//                List<Address> addresses = geocoder.getFromLocation(
+//                        location.getLatitude(), location.getLongitude(), 1
+//                );
+//                return addresses.get(0).getAddressLine(0);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                return "Sorry, Location not found. Please try again.";
+//            }
+//        }
+//        return "Sorry, Location not found. Please try again.";
+//    }
+public String getAddress(Location location) {
+    try {
+        Geocoder geocoder = new Geocoder(activity,
+                Locale.getDefault());
+        List<Address> addresses = geocoder.getFromLocation(
+                location.getLatitude(), location.getLongitude(), 1
+        );
 
-        if (location != null) {
-            try {
-                Geocoder geocoder = new Geocoder(activity,
-                        Locale.getDefault());
-                List<Address> addresses = geocoder.getFromLocation(
-                        location.getLatitude(), location.getLongitude(), 1
-                );
-                return addresses.get(0).getAddressLine(0);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "Sorry, Location not found. Please try again.";
-            }
-        }
-        return "Sorry, Location not found. Please try again.";
+        return addresses.get(0).getAddressLine(0);
+    } catch (IOException e) {
+        e.printStackTrace();
+        return null;
     }
+}
 
     public interface LocationDataCallback{
         void onDataCallback(Location location);
