@@ -196,9 +196,9 @@ public class HomeFragment extends Fragment {
         threadHandler.post(new Runnable() {
             @Override
             public void run() {
-                gps.getLocation(new GPSHelper.LocationCallback() {
+                gps.getLastLocation(new GPSHelper.LocationDataCallback() {
                     @Override
-                    public void onCallback(Location location) {
+                    public void onDataCallback(Location location) {
                         Log.d(TAG, "onCallback: location retrieved");
                         // set location of alert and send sms to contacts with geolink
                         emergency.setLocation(location);
