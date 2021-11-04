@@ -1,5 +1,7 @@
 package com.example.help.ui.signIn;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.help.MainActivity;
 import com.example.help.R;
+import com.example.help.util.FirestoreUserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
@@ -19,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SignInActivity extends AppCompatActivity {
+
+    private static final String TAG = "SignInActivity";
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
@@ -28,12 +33,30 @@ public class SignInActivity extends AppCompatActivity {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
             Log.d("SigninActivity", "on Listener: a user signed in, back to main act");
-            startActivity(new Intent(this, MainActivity.class));
+//            startActivity(new Intent(this, MainActivity.class));
+            FirestoreUserHelper userHelper = new FirestoreUserHelper();
+            userHelper.doesUserDocExist(new FirestoreUserHelper.ResultListener() {
+                @Override
+                public void onTrue() {
+                    // existing user, go to home screen
+                    Log.d(TAG, "onTrue: ");
+                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                }
+
+                @Override
+                public void onFalse() {
+                    Log.d(TAG, "onFalse: ");
+                    // new user, need to add userDoc to firebase
+                    startActivity(new Intent(getApplicationContext(), NewSignUpActivity.class));
+                }
+            });
+
             finish();
         } else {
             executeSignInAction();
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +90,7 @@ public class SignInActivity extends AppCompatActivity {
             Log.d("SignInActivity", "onStart: no user logged in ");
             executeSignInAction();
         } else {
-            startActivity(new Intent(this, MainActivity.class));
+//            startActivity(new Intent(this, MainActivity.class));
             finish();
         }
     }
@@ -97,7 +120,13 @@ public class SignInActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             String displayName = user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
             Log.d("SignInActivity.java","onSignInResult: "+"sign in succeed, as user: "+displayName);
-            startActivity(new Intent(this, MainActivity.class));
+
+//            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+
+
+
+
+            // else sent to collect additional info
             finish();
         } else {
 //            result.getResultCode();

@@ -43,7 +43,7 @@ public class FirestoreUserHelper {
 
 
 
-    private FirestoreUserHelper() {
+    public FirestoreUserHelper() {
         this.userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d(TAG, "FirestoreUserHelper: uid is " + userId);
     }
@@ -105,6 +105,26 @@ public class FirestoreUserHelper {
                 });
     }
 
+    public void createUserDoc(String phoneNumber){
+        Map<String, Object> user = new HashMap<>();
+        user.put("phoneNumber", phoneNumber);
+
+        db.collection("users").document(userId)
+                .set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+    }
+
 
     public void getJSONStr(DocumentReference docRef, StringCallback callback) {
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -120,6 +140,28 @@ public class FirestoreUserHelper {
                         callback.onCallback(json);
                     } else {
                         Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    public void doesUserDocExist(ResultListener callback){
+        Log.d(TAG, "doesUserDocExist: checkinf is user exists with id  " + userId);
+        DocumentReference docRef = db.collection(COLLECTION_USERS).document(userId);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        callback.onTrue();
+                    } else {
+                        Log.d(TAG, "No such document");
+                        callback.onFalse();
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -169,6 +211,11 @@ public class FirestoreUserHelper {
                 }
             }
         });
+    }
+
+    public interface ResultListener {
+        void onTrue();
+        void onFalse();
     }
 
     public interface SuccessCallback {
