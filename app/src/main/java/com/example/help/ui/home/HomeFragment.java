@@ -249,8 +249,8 @@ public class HomeFragment extends Fragment {
                                 Message chatMessage = new Message();
                                 // TODO: the audio is not saving properly in firebase and so the filepath
                                 // is not valid. Test url is being used currently.
-                                // chatMessage.setVoiceUrl(filePath)
-                                chatMessage.setVoiceUrl("https://firebasestorage.googleapis.com/v0/b/fir-back-63b50.appspot.com/o/On17gmv2bXduC6SlkAw3OnC0P3d2%2F-MnNemkN1Jw0mosn2DvP%2F21?alt=media&token=f13bdbe0-ab50-4059-ba01-0eec9d00c402");
+                                 chatMessage.setVoiceUrl(filePath);
+//                                chatMessage.setVoiceUrl("https://firebasestorage.googleapis.com/v0/b/fir-back-63b50.appspot.com/o/On17gmv2bXduC6SlkAw3OnC0P3d2%2F-MnNemkN1Jw0mosn2DvP%2F21?alt=media&token=f13bdbe0-ab50-4059-ba01-0eec9d00c402");
                                 chatMessage.send();
                             }
 
