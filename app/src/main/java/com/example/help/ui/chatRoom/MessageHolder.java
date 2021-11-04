@@ -1,5 +1,6 @@
 package com.example.help.ui.chatRoom;
 
+import android.media.Image;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +42,8 @@ public class MessageHolder extends RecyclerView.ViewHolder {
     public void setMessage(String string) {
         message.setText(string);
     }
+
+
     public void bindMessage(Message friendlyMessage) {
         GlideApp.with(mBinding.messageImageView.getContext()).clear(mBinding.messageImageView);
         if (friendlyMessage.getText() != null && !TextUtils.isEmpty(friendlyMessage.getText())) {

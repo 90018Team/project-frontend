@@ -3,35 +3,50 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 <!-- TODO: It is better to have every String literal to be in the strings.xml ...Caleb   -->
     <PreferenceCategory
-        app:key="app_category"
-        app:title="@string/app_setting">
+        app:key="alert_category"
+        app:title="@string/alert_setting">
 
         <SwitchPreferenceCompat
-            app:key="notifications"
-            app:title="Enable message notifications"
-            app:summary="It does nothing for now -------Caleb"
-            />
-        <EditTextPreference
-            app:key="default message"
-            app:title="@string/default_message_title"
-            app:summary="message that's been sent after triggering the emergency"
-            />
+            app:key="message"
+            app:title="@string/message_setting_title"
+            app:summary="@string/message_setting_summary"
+            app:defaultValue="true"/>
+            <EditTextPreference
+                app:key="defaultmessagetext"
+                app:title="@string/default_message_title"
+                app:summary="@string/default_message_summary" />
+        <SwitchPreferenceCompat
+            app:key="geolocation"
+            app:title="@string/geolocation_setting_title"
+            app:summary="@string/geolocation_setting_summary"
+            app:defaultValue="true"/>
+        <SwitchPreferenceCompat
+            app:key="takephoto"
+            app:title="@string/takephoto_setting_title"
+            app:summary="@string/takephoto_setting_summary"
+            app:defaultValue="true"/>
+        <SwitchPreferenceCompat
+            app:key="recordaudio"
+            app:title="@string/recordaudio_setting_title"
+            app:summary="@string/recordaudio_setting_summary"
+            app:defaultValue="true"/>
+
         <Preference
             app:key="logout"
             app:title="@string/string_log_out"
             />
     </PreferenceCategory>
-    <PreferenceCategory
+    <!--<PreferenceCategory
         app:key="privacy_category"
         app:title="Privacy settings">
 
         <SwitchPreferenceCompat
             app:key="broadcast"
             app:title="Enable emergency broadcasting"
-            app:summary="It does nothing for now -------Caleb"
+            app:summary="It does nothing for now -&#45;&#45;&#45;&#45;&#45;&#45;Caleb"
             />
 
-    </PreferenceCategory>
+    </PreferenceCategory>-->
     <PreferenceCategory
         app:key="feedback_category"
         app:title="Have your say">

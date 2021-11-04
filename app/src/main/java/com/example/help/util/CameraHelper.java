@@ -135,6 +135,8 @@ public class CameraHelper {
         }, ContextCompat.getMainExecutor(thisFragment.requireContext()));
     }
 
+
+
     public void captureImage(UriCallback callback){
         Log.d(TAG, "takePicture: taking");
         // get base directory

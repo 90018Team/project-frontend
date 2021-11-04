@@ -1,15 +1,12 @@
 package com.example.help.models;
 
 import android.location.Location;
-import android.provider.Telephony;
-import android.telephony.SmsManager;
-import android.telephony.SmsMessage;
-import android.util.Log;
 
 import com.example.help.util.FirestoreUserHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
