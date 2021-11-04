@@ -19,21 +19,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:orientation="vertical"
-        android:background="@color/colorLightGreen"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
         android:layout_marginHorizontal="6dp"
-        android:showDividers="middle"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_message_gray"
         android:divider="@drawable/empty_tall_divider"
-        >
+        android:orientation="vertical"
+        android:showDividers="end">
+
 
         <TextView
             android:id="@+id/messengerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:paddingTop="10dp"
+            android:paddingLeft="20dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             tools:text="@tools:sample/full_names" />
 
@@ -42,69 +43,70 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:paddingLeft="20dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             tools:text="@tools:sample/lorem" />
 
-<!--        TODO: Modify messageVoiceView into an actual voice player-->
-<!--        <TextView-->
-<!--            android:id="@+id/messageVoiceView"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="0"-->
-<!--            android:textAppearance="?android:attr/textAppearanceLarge"-->
-<!--            tools:text="@string/voice_placeHolder_empty" />-->
+        <!--        TODO: Modify messageVoiceView into an actual voice player-->
+        <!--        <TextView-->
+        <!--            android:id="@+id/messageVoiceView"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="0"-->
+        <!--            android:textAppearance="?android:attr/textAppearanceLarge"-->
+        <!--            tools:text="@string/voice_placeHolder_empty" />-->
         <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
             android:id="@+id/messageVoiceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:enableVisualizer="true"
-            app:visualizationPlayedColor="#ff7700"
-            app:visualizationNotPlayedColor="#727171"
             app:playPauseBackgroundColor="#ff7700"
-            app:timingBackgroundColor="#6AFF7700"
-            app:seekBarProgressColor="#000"
-            app:showShareButton="true"
-            app:shareCornerRadius="100"
             app:playPauseCornerRadius="100"
-            app:showTiming="true"
-            app:viewCornerRadius="100"
-            app:viewBackground="#C6C4CF"
+            app:playProgressbarColor="#ff7700"
             app:progressTimeColor="#000"
+            app:seekBarProgressColor="#000"
             app:seekBarThumbColor="#FFC107"
             app:shareBackgroundColor="#ff7700"
-            app:playProgressbarColor="#ff7700"
-            app:shareText="SHARE ME"/>
+            app:shareCornerRadius="100"
+            app:shareText="SHARE ME"
+            app:showShareButton="true"
+            app:showTiming="true"
+            app:timingBackgroundColor="#6AFF7700"
+            app:viewBackground="@color/white"
+            app:viewCornerRadius="100"
+            app:visualizationNotPlayedColor="#727171"
+            app:visualizationPlayedColor="#ff7700" />
 
 
 
-<!--        <androidx.fragment.app.FragmentContainerView-->
-<!--            android:id="@+id/map"-->
-<!--            android:name="com.google.android.gms.maps.SupportMapFragment"-->
-<!--            android:layout_width="229dp"-->
-<!--            android:layout_height="137dp"-->
-<!--            android:layout_alignParentStart="true"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:layout_marginStart="73dp"-->
-<!--            android:layout_marginBottom="247dp"-->
-<!--            tools:context="com.example.mapwithmarker.MapsMarkerActivity" />-->
-
-
-        <ImageView
+        <!--        <androidx.fragment.app.FragmentContainerView-->
+        <!--            android:id="@+id/map"-->
+        <!--            android:name="com.google.android.gms.maps.SupportMapFragment"-->
+        <!--            android:layout_width="229dp"-->
+        <!--            android:layout_height="137dp"-->
+        <!--            android:layout_alignParentStart="true"-->
+        <!--            android:layout_alignParentBottom="true"-->
+        <!--            android:layout_marginStart="73dp"-->
+        <!--            android:layout_marginBottom="247dp"-->
+        <!--            tools:context="com.example.mapwithmarker.MapsMarkerActivity" />-->
+<ImageView
             android:id="@+id/messageImageView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/rounded_message_gray"
             android:scaleType="fitCenter"
             tools:src="@tools:sample/backgrounds/scenic" />
-
         <TextView
             android:id="@+id/timeStampTextView"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
+            android:paddingBottom="10dp"
+            android:paddingRight="10dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             tools:text="@tools:sample/date/hhmmss" />
+
 
     </LinearLayout>
 

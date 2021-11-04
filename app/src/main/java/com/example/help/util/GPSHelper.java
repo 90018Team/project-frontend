@@ -38,18 +38,14 @@ public class GPSHelper<PlacesDecoder> {
     public void getLocation(LocationCallback callback) {
         Log.d(TAG, "getLocation: getting");
         try {
+
             fusedLocationProviderClient
                     .getLastLocation()
                     .addOnCompleteListener(activity, new OnCompleteListener<Location>() {
                         @Override
                         public void onComplete(@NonNull Task<Location> task) {
                             Location location = task.getResult();
-                            //if (location != null) {
                             callback.onCallback(location);
-                            //} else {
-                                //Toast.makeText(activity, "Location is null, please try again", Toast.LENGTH_SHORT).show();
-
-                            //}
                         }
                     });
         } catch (SecurityException e) {
@@ -61,6 +57,7 @@ public class GPSHelper<PlacesDecoder> {
 
 
     public String getAddress(Location location) {
+        
         if (location != null) {
             try {
                 Geocoder geocoder = new Geocoder(activity,
