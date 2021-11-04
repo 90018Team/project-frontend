@@ -38,6 +38,9 @@ import com.example.help.util.jsonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private HomeFragmentBinding binding;
@@ -272,8 +275,16 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onSuccess(String filePath) {
                         Message chatMessage = new Message();
-                        chatMessage.setImageUrl(filePath);
-                        chatMessage.send();
+                        try {
+                            URL imageURL = new URL(filePath);
+                            //chatMessage.setImageUrl(filePath);
+                            chatMessage.setImageUrl(imageURL.toString());
+                            chatMessage.send();
+
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+
                     }
 
                     @Override
