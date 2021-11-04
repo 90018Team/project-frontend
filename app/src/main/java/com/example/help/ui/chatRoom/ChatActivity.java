@@ -129,6 +129,8 @@ public class ChatActivity extends AppCompatActivity{
                     }
                     else{
                         Log.d(TAG, "onDataChange: The room is not found, creating...");
+                        finalMessagesRef.child(getUserName())
+                                .push().setValue("");
                         Log.d(TAG, "onDataChange: room created");
                     }
                 }

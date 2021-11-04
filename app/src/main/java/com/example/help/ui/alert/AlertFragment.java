@@ -91,11 +91,13 @@ public class AlertFragment extends Fragment {
 
 
             phoneNumbers.add("");
+            phoneNumbers.add("null");
             userHelper = FirestoreUserHelper.getInstance();
             userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
                 @Override
                 public void onCallback(ArrayList<Contact> contactList) {
                     for (Contact c : contactList){
+                        Log.d(TAG, "n: " + c.getPhoneNumber());
                         phoneNumbers.add(c.getPhoneNumber());
                     }
                 }
@@ -108,18 +110,20 @@ public class AlertFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     for(DataSnapshot d : snapshot.getChildren()) {
-                        HashMap message = (HashMap)snapshot.child(d.getKey()).getChildren().iterator().next().getValue();
-                        if (message.get("id") != null) {
-                            String[] info = ((String)message.get("id")).split(" ");
-                            if (info.length == 3) {
-                                String location = info[1] + " " + info[2];
-                                String number =info[0];
-                                if (phoneNumbers.contains(number)) {
-                                    Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
-                                    googleMap.addMarker(new MarkerOptions()
-                                            .position(a.getLatLng())
-                                            .title(a.getName())
-                                            .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                        if (!(snapshot.child(d.getKey()).getChildren().iterator().next().getValue() instanceof java.lang.String)) {
+                            HashMap message = (HashMap)snapshot.child(d.getKey()).getChildren().iterator().next().getValue();
+                            if (message.get("id") != null) {
+                                String[] info = ((String)message.get("id")).split(" ");
+                                if (info.length == 3) {
+                                    String location = info[1] + " " + info[2];
+                                    String number =info[0];
+                                    if (phoneNumbers.contains(number)) {
+                                        Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
+                                        googleMap.addMarker(new MarkerOptions()
+                                                .position(a.getLatLng())
+                                                .title(a.getName())
+                                                .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                                    }
                                 }
                             }
                         }

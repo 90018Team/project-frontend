@@ -2,14 +2,14 @@ package com.example.help.ui.home;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Location;
 import android.location.LocationManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,15 +19,24 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceManager;
 
-import com.example.help.R;
-import com.example.help.databinding.HomeFragmentBinding;
+
 import com.example.help.models.Alert;
 import com.example.help.models.Message;
+
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.help.ui.chatRoom.ChatActivity;
+import com.example.help.R;
+import com.example.help.databinding.HomeFragmentBinding;
+
+
 import com.example.help.util.AudioRecorderHelper;
 import com.example.help.util.CameraHelper;
 import com.example.help.util.FirebaseStorageHelper;
@@ -35,11 +44,17 @@ import com.example.help.util.FirestoreUserHelper;
 import com.example.help.util.GPSHelper;
 import com.example.help.util.jsonUtil;
 
+
+
+import com.example.help.util.jsonUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.File;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
@@ -63,12 +78,6 @@ public class HomeFragment extends Fragment {
     private final HandlerThread cameraHandlerThread = new HandlerThread("Camera Handler Thread");
     private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
-    SharedPreferences sharedPrefs;
-    String defaultMessageText = "I am in distress and need assistance. ";
-    boolean isSendMessageText = true;
-    boolean isTakePhoto = true;
-    boolean isGeoLocation = true;
-    boolean isRecordAudio = true;
 
     private static final String TAG = "HomeFragment";
 
@@ -77,16 +86,6 @@ public class HomeFragment extends Fragment {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         binding = HomeFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        // shared preferences read from settings page and toggles and the default message entered
-        // If no text entered default message "I am in distress and need assistance. " is used
-        // all default booleans are true
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        defaultMessageText = sharedPrefs.getString("defaultmessagetext", defaultMessageText);
-        isSendMessageText = sharedPrefs.getBoolean("message", isSendMessageText);
-        isGeoLocation = sharedPrefs.getBoolean("geolocation", isGeoLocation);
-        isTakePhoto = sharedPrefs.getBoolean("takephoto", isTakePhoto);
-        isRecordAudio = sharedPrefs.getBoolean("recordaudio", isRecordAudio);
 
         imageView2 = root.findViewById(R.id.imageView2);
         frameLayout1 = root.findViewById(R.id.frameLayout1);
@@ -163,34 +162,25 @@ public class HomeFragment extends Fragment {
     private void alertActivated() {
         Alert alert = new Alert();
         // take photo while this fragment is still open
-        // if photo enabled, proceed to capture
-        if (isTakePhoto) {
-            cameraHelper.takePhoto(new CameraHelper.UriCallback() {
-                @Override
-                public void onImageCaptured(Uri uri) {
-                    // then start chat activity
-                    startActivity(new Intent(getContext(), ChatActivity.class));
-                    // store and send photo in background thread
-                    sendPhoto(uri);
-                }
+        cameraHelper.takePhoto(new CameraHelper.UriCallback() {
+            @Override
+            public void onImageCaptured(Uri uri) {
+                // then start chat activity
+                startActivity(new Intent(getContext(), ChatActivity.class));
+                // store and send photo in background thread
+                sendPhoto(uri);
+            }
 
-                @Override
-                public void onFailure() {
-                    Log.d(TAG, "onFailure: image capture failed.");
-                    Toast.makeText(getContext(), "Automatic image capture failed.", Toast.LENGTH_SHORT);
-                }
-            });
-        }
-        // else proceed to chat activity
-        else {
-            startActivity(new Intent(getContext(), ChatActivity.class));
-        }
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "onFailure: image capture failed.");
+                Toast.makeText(getContext(), "Automatic image capture failed.", Toast.LENGTH_SHORT);
+            }
+        });
 
         // get and send gps and audio data in background thread
         sendGpsData(alert);
-
-        // if audio enabled, send
-        if (isRecordAudio) { sendAudioData(alert); }
+        sendAudioData(alert);
 
     }
 
@@ -207,22 +197,14 @@ public class HomeFragment extends Fragment {
                         // set location of alert and send sms to contacts with geolink
                         emergency.setLocation(location);
                         userHelper.sendSMSToContacts(emergency.getTextMessage());
-                        Message chatMessage = new Message();
 
                         // send location in chat
+                        Message chatMessage = new Message();
+                        String txt = "I am in distress and need assistance. ";
+                        txt += "My location is " + gps.getAddress(location);
 
-                        String txt = "";
-                        // if send message and location enabled do both
-                        if (isSendMessageText) {
-                            txt = defaultMessageText;
-                            if (isGeoLocation) {
-                                txt += ", My location is " + gps.getAddress(location);
-                            }
-                        }
-                        // else if only location
-                        else if (isGeoLocation) {
-                            txt = "My location is " + gps.getAddress(location);
-                        }
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        chatMessage.setId( user.getPhoneNumber()+ " " + location.getLatitude() + " " + location.getLongitude());
                         chatMessage.setText(txt);
                         chatMessage.send();
                     }
@@ -276,16 +258,8 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onSuccess(String filePath) {
                         Message chatMessage = new Message();
-                        try {
-                            URL imageURL = new URL(filePath);
-                            //chatMessage.setImageUrl(filePath);
-                            chatMessage.setImageUrl(imageURL.toString());
-                            chatMessage.send();
-
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-
+                        chatMessage.setImageUrl(filePath);
+                        chatMessage.send();
                     }
 
                     @Override
