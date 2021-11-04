@@ -54,6 +54,7 @@ public class GPSHelper {
     public void getLocation(LocationCallback callback) {
         Log.d(TAG, "getLocation: getting");
         try {
+
             fusedLocationProviderClient
                     .getLastLocation()
                     .addOnCompleteListener(activity, new OnCompleteListener<Location>() {

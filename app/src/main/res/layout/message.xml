@@ -33,6 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:paddingTop="10dp"
             android:paddingLeft="20dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             tools:text="@tools:sample/full_names" />
@@ -95,8 +96,17 @@
             android:adjustViewBounds="true"
             android:background="@drawable/rounded_message_gray"
             android:scaleType="fitCenter"
-            android:paddingBottom="20dp"
             tools:src="@tools:sample/backgrounds/scenic" />
+        <TextView
+            android:id="@+id/timeStampTextView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingBottom="10dp"
+            android:paddingRight="10dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            tools:text="@tools:sample/date/hhmmss" />
+
 
     </LinearLayout>
 
