@@ -91,11 +91,13 @@ public class AlertFragment extends Fragment {
 
 
             phoneNumbers.add("");
+            phoneNumbers.add("null");
             userHelper = FirestoreUserHelper.getInstance();
             userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
                 @Override
                 public void onCallback(ArrayList<Contact> contactList) {
                     for (Contact c : contactList){
+                        Log.d(TAG, "n: " + c.getPhoneNumber());
                         phoneNumbers.add(c.getPhoneNumber());
                     }
                 }
