@@ -72,18 +72,15 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
     private void executeSignInAction(){
-        // Choose authentication providers
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.PhoneBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build());
+                new AuthUI.IdpConfig.PhoneBuilder().build()
+        );
 
-        // Create and launch sign-in intent
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
-                .setIsSmartLockEnabled(false)
                 .setTheme(R.style.LoginTheme)
+                .setAlwaysShowSignInMethodScreen(true)
                 .build();
         signInLauncher.launch(signInIntent);
     }
@@ -108,4 +105,6 @@ public class SignInActivity extends AppCompatActivity {
             Log.d("SignInActivity.java", "onSignInResult: "+"sign in failed");
         }
     }
+
+
 }

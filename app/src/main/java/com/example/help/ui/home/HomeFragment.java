@@ -81,7 +81,7 @@ public class HomeFragment extends Fragment {
         // shared preferences read from settings page and toggles and the default message entered
         // If no text entered default message "I am in distress and need assistance. " is used
         // all default booleans are true
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
         defaultMessageText = sharedPrefs.getString("defaultmessagetext", defaultMessageText);
         isSendMessageText = sharedPrefs.getBoolean("message", isSendMessageText);
         isGeoLocation = sharedPrefs.getBoolean("geolocation", isGeoLocation);
@@ -95,7 +95,7 @@ public class HomeFragment extends Fragment {
 
         cameraHelper = new CameraHelper(this);
         storageHelper = new FirebaseStorageHelper();
-        userHelper = FirestoreUserHelper.getInstance();
+        //userHelper = FirestoreUserHelper.getInstance();
         gpsHandlerThread.start();
         audioHandlerThread.start();
         cameraHandlerThread.start();

@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class GPSHelper<PlacesDecoder> {
+public class GPSHelper {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Activity activity;
@@ -57,7 +57,7 @@ public class GPSHelper<PlacesDecoder> {
 
 
     public String getAddress(Location location) {
-        
+
         if (location != null) {
             try {
                 Geocoder geocoder = new Geocoder(activity,
