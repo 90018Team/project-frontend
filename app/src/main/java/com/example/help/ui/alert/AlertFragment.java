@@ -90,17 +90,14 @@ public class AlertFragment extends Fragment {
             Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 
 
-
-            // TODO: get Contact list
+            phoneNumbers.add("");
             userHelper = FirestoreUserHelper.getInstance();
             userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
                 @Override
                 public void onCallback(ArrayList<Contact> contactList) {
-                    Log.d(TAG, "aa" + contactList.size());
                     for (Contact c : contactList){
                         phoneNumbers.add(c.getPhoneNumber());
                     }
-
                 }
             });
 
@@ -111,18 +108,19 @@ public class AlertFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     for(DataSnapshot d : snapshot.getChildren()) {
-                        Log.d(TAG, "dddd: " + d.getKey());
                         HashMap message = (HashMap)snapshot.child(d.getKey()).getChildren().iterator().next().getValue();
-                        String location = (String) message.get("text");
-                        String number = (String) message.get("name");
-
-                        Log.d(TAG, "phone number: " + number);
-                        if (phoneNumbers.contains(number)) {
-                            Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
-                            googleMap.addMarker(new MarkerOptions()
-                                    .position(a.getLatLng())
-                                    .title(a.getName())
-                                    .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                        String[] info = ((String)message.get("id")).split(" ");
+                        Log.d(TAG, "len " + info.length);
+                        if (info.length == 3) {
+                            String location = info[1] + " " + info[2];
+                            String number =info[0];
+                            if (phoneNumbers.contains(number)) {
+                                Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
+                                googleMap.addMarker(new MarkerOptions()
+                                        .position(a.getLatLng())
+                                        .title(a.getName())
+                                        .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                            }
                         }
                     }
                 }

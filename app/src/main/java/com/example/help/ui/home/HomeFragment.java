@@ -200,6 +200,8 @@ public class HomeFragment extends Fragment {
                         Message chatMessage = new Message();
                         String txt = "I am in distress and need assistance. ";
                         txt += "My location is " + gps.getAddress(location);
+
+                        chatMessage.setId( userHelper.getPhoneNumber()+ " " + location.getLatitude() + " " + location.getLongitude());
                         chatMessage.setText(txt);
                         chatMessage.send();
                     }
