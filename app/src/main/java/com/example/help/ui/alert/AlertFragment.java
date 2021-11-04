@@ -27,7 +27,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.help.R;
 import com.example.help.databinding.AlertFragmentBinding;
 import com.example.help.models.Alert;
+import com.example.help.models.Contact;
 import com.example.help.ui.chatRoom.ChatActivity;
+import com.example.help.util.FirestoreUserHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -64,7 +66,8 @@ public class AlertFragment extends Fragment {
     private static final int REQUEST_CODE = 101;
     LatLng curLocation;
     GoogleMap gMap;
-
+    private FirestoreUserHelper userHelper;
+    List<String> phoneNumbers = new ArrayList<>();
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
         @Override
@@ -89,7 +92,17 @@ public class AlertFragment extends Fragment {
 
 
             // TODO: get Contact list
-            List<String> phoneNumbers = Arrays.asList("111", "456", "12332", "", "zzz", "David Price" );
+            userHelper = FirestoreUserHelper.getInstance();
+            userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
+                @Override
+                public void onCallback(ArrayList<Contact> contactList) {
+                    Log.d(TAG, "aa" + contactList.size());
+                    for (Contact c : contactList){
+                        phoneNumbers.add(c.getPhoneNumber());
+                    }
+
+                }
+            });
 
             ArrayList<Alert> allAlerts = new ArrayList<>();
             mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
