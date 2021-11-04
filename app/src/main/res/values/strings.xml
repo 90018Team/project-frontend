@@ -31,9 +31,7 @@
 
     <string name="takephoto_setting_title">Enable Automatic Photo Capture</string>
     <string name="takephoto_setting_summary">Enables a photo to be captured by your device
-        on alert activation. If it is lying face down or face up
-        at the time of opening the alert screen, the camera pointing upwards will be chosen,
-        otherwise the back camera is default. The photo will be sent with default alert</string>
+        on alert activation. Either the front or back camera will be chosen dependent on whether the device is face up or face down. The photo will be sent with default alert</string>
 
     <string name="recordaudio_setting_title">Enable Auto Audio Recording</string>
     <string name="recordaudio_setting_summary">Enables 5 seconds of audio to be recorded on alert activation
