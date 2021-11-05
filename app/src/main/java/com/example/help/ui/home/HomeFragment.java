@@ -34,6 +34,8 @@ import com.example.help.util.FirebaseStorageHelper;
 import com.example.help.util.FirestoreUserHelper;
 import com.example.help.util.GPSHelper;
 import com.example.help.util.jsonUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -219,7 +221,16 @@ public class HomeFragment extends Fragment {
                             txt = "My location is " + gps.getAddress(location);
                         }
                         chatMessage.setText(txt);
-                        chatMessage.send();
+//                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        userHelper.getPhoneNumber(new FirestoreUserHelper.StringCallback() {
+                            @Override
+                            public void onCallback(String phoneNumber) {
+                                Log.d(TAG, "onCallback: retrieved phoneNumber " + phoneNumber);
+                                chatMessage.setId(phoneNumber + " " + location.getLatitude() + " " + location.getLongitude());
+                                chatMessage.send();
+                            }
+                        });
+
                     }
                 });
             }

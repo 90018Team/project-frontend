@@ -117,6 +117,7 @@ public class AlertFragment extends Fragment {
                                 if (info.length == 3) {
                                     String location = info[1] + " " + info[2];
                                     String number =info[0];
+                                    Log.d(TAG, "onDataChange: number " + number);
                                     if (phoneNumbers.contains(number)) {
                                         Alert a =  new Alert((String) d.getKey(), location.split(" ")[0], location.split(" ")[1]);
                                         googleMap.addMarker(new MarkerOptions()

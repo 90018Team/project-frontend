@@ -101,7 +101,6 @@ public class FirestoreUserHelper {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-
                         Object obj = document.getData();
                         String json = new Gson().toJson(obj);
                         callback.onCallback(json);
@@ -175,9 +174,27 @@ public class FirestoreUserHelper {
         return user.getDisplayName()==null?"ANONYMOUS":user.getDisplayName();
     }
 
-    public String getPhoneNumber(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        return user.getPhoneNumber()==null?"ANONYMOUS":user.getPhoneNumber();
+    public void getPhoneNumber(StringCallback callback){
+        Log.d(TAG, "getPhoneNumber: ");
+        DocumentReference docRef = db.collection(COLLECTION_USERS).document(userId);
+        Log.d(TAG, "getPhoneNumber: docRef = " + docRef.toString());
+        getJSONStr(docRef, new StringCallback() {
+            @Override
+            public void onCallback(String json) {
+                try {
+                    // Create list of contacts from JSON
+                    Log.d(TAG, "onCallback: " + json);
+                    JSONObject obj = new JSONObject(json);
+                    String phoneNumber = obj.getString("phoneNumber");
+                    Log.d(TAG, "onCallback: phoneNumber " + phoneNumber);
+                    callback.onCallback(phoneNumber);
+                } catch (JSONException e) {
+                    Log.d(TAG, "onCallback: JSONException");
+                    e.printStackTrace();
+                }
+            }
+        });
+//
     }
 
     public void doesUserDocExist(ResultListener callback){
