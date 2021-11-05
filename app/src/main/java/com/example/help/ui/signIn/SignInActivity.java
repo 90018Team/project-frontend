@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.help.MainActivity;
 import com.example.help.R;
+import com.example.help.util.FirestoreUserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
@@ -24,11 +25,29 @@ public class SignInActivity extends AppCompatActivity {
             new FirebaseAuthUIActivityResultContract(),
             this::onSignInResult);
 
+    private static final String TAG = "SignInActivity";
+
     private final FirebaseAuth.AuthStateListener mAuthListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
             Log.d("SigninActivity", "on Listener: a user signed in, back to main act");
-            startActivity(new Intent(this, MainActivity.class));
+//            startActivity(new Intent(this, MainActivity.class));
+            FirestoreUserHelper userHelper = new FirestoreUserHelper();
+            userHelper.doesUserDocExist(new FirestoreUserHelper.ResultListener() {
+                @Override
+                public void onTrue() {
+                    // existing user, go to home screen
+                    Log.d(TAG, "onTrue: ");
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                }
+
+                @Override
+                public void onFalse() {
+                    Log.d(TAG, "onFalse: ");
+                    // new user, need to add userDoc to firebase
+                    startActivity(new Intent(getApplicationContext(), NewSignUpActivity.class));
+                }
+            });
             finish();
         } else {
             executeSignInAction();
@@ -71,17 +90,27 @@ public class SignInActivity extends AppCompatActivity {
             finish();
         }
     }
+//    private void executeSignInAction(){
+//        List<AuthUI.IdpConfig> providers = Arrays.asList(
+//                new AuthUI.IdpConfig.EmailBuilder().build());
+//
+//        Intent signInIntent = AuthUI.getInstance()
+//                .createSignInIntentBuilder()
+//                .setAvailableProviders(providers)
+//                .setTheme(R.style.LoginTheme)
+//                .setIsSmartLockEnabled(false)
+//                .build();
+//        signInLauncher.launch(signInIntent);
+//    }
+
     private void executeSignInAction(){
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.PhoneBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build());
-
+                new AuthUI.IdpConfig.EmailBuilder().build());
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
                 .setTheme(R.style.LoginTheme)
-                .setIsSmartLockEnabled(false)
+                .setAlwaysShowSignInMethodScreen(true)
                 .build();
         signInLauncher.launch(signInIntent);
     }

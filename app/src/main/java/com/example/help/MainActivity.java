@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.help.ui.PopUpDialog;
 import com.example.help.ui.chatRoom.ChatActivity;
+import com.example.help.ui.signIn.NewSignUpActivity;
 import com.example.help.ui.signIn.SignInActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.BuildConfig;
@@ -32,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         getConnectivityStatus(this);
         FirebaseApp.initializeApp(this);
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        Intent intent=getIntent();
         if(!isCurrentUserSignedIn()){
             Log.d("Main activity", "onCreate: "+"user not signed in");
             startActivity(new Intent(this,SignInActivity.class));
@@ -60,6 +65,15 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.READ_EXTERNAL_STORAGE};
         if (!checkPermissions(MainActivity.this,PERMISSIONS)) {
             ActivityCompat.requestPermissions(MainActivity.this,PERMISSIONS,1); }
+
+
+        // open welcome pop up if new user
+        boolean newUser = intent.getBooleanExtra("newUser", false);
+        Log.d(TAG, "onCreate: newUser = " + newUser);
+        if (newUser) {
+            PopUpDialog popup = new PopUpDialog("Welcome!", "Get started by adding your emergency contacts by pressing the Contacts icon in the bottom menu.", "ok");
+            popup.show(getSupportFragmentManager(), "welcome dialog");
+        }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -79,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: hello");
         if(isCurrentUserSignedIn()){
             Log.d("Main activity", "onCreate: "+"user has signed in");
             reload();
@@ -89,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this,SignInActivity.class));
             finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public boolean isCurrentUserSignedIn() {
@@ -156,7 +176,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-        } }
+        } };
+
+
+    public void setActionBarTitle(String title) {
+        Objects.requireNonNull(getSupportActionBar()).setTitle(title);
+    }
 
 
 

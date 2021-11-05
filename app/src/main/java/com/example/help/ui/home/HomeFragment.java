@@ -92,7 +92,7 @@ public class HomeFragment extends Fragment {
 
         cameraHelper = new CameraHelper(this);
         storageHelper = new FirebaseStorageHelper();
-        userHelper = FirestoreUserHelper.getInstance();
+        userHelper = new FirestoreUserHelper();
         gpsHandlerThread.start();
         audioHandlerThread.start();
         cameraHandlerThread.start();

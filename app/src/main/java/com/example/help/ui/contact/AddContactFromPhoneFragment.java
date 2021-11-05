@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.example.help.MainActivity;
 import com.example.help.R;
 import com.example.help.databinding.AddContactFromPhoneBinding;
 import com.example.help.models.Contact;
@@ -55,17 +56,14 @@ public class AddContactFromPhoneFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        ((MainActivity) getActivity()).setActionBarTitle("Add Contact");
         binding = AddContactFromPhoneBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        this.getActivity().setTitle("Add Contact");
-        Log.d(TAG, "Opened.");
 
-
-        userHelper = FirestoreUserHelper.getInstance();
+        userHelper = new FirestoreUserHelper();
         recyclerView = root.findViewById(R.id.phone_contact_recycler);
         searchView = root.findViewById(R.id.phone_contacts_search);
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-
 
         getPhoneContacts();
         populateRecyclerView(root);

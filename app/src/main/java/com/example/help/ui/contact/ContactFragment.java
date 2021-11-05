@@ -61,7 +61,7 @@ public class ContactFragment extends Fragment {
         View root = binding.getRoot();
 
 
-        userHelper = FirestoreUserHelper.getInstance();
+        userHelper = new FirestoreUserHelper();
         addButton = (FloatingActionButton) root.findViewById(R.id.addButton);
         recyclerView = root.findViewById(R.id.contact_recycler);
         noContactsText = root.findViewById(R.id.noContactsText);

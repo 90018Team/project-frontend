@@ -92,7 +92,7 @@ public class AlertFragment extends Fragment {
 
             phoneNumbers.add("");
             phoneNumbers.add("null");
-            userHelper = FirestoreUserHelper.getInstance();
+            userHelper = new FirestoreUserHelper();
             userHelper.retrieveContacts(new FirestoreUserHelper.ContactListCallback() {
                 @Override
                 public void onCallback(ArrayList<Contact> contactList) {

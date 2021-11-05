@@ -23,7 +23,7 @@ public class Message {
     private String voiceUrl;
     private String voiceTempPath;
     private Date timeStamp;
-    protected FirestoreUserHelper userHelper = FirestoreUserHelper.getInstance();
+    protected FirestoreUserHelper userHelper = new FirestoreUserHelper();
     private static String MESSAGES_CHILD = "/emergency_event/";
 
     String TAG = "Message";

@@ -20,41 +20,42 @@
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/activity_alert_room.xml" value="0.21875" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/activity_chat.xml" value="0.28306159420289856" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/activity_main.xml" value="0.28306159420289856" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/add_contact_from_phone.xml" value="0.20364583333333333" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/alert_fragment.xml" value="0.21875" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/contact_fragment.xml" value="0.21875" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/contact_row.xml" value="0.20364583333333333" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_item_list.xml" value="0.3663949275362319" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_list.xml" value="0.3663949275362319" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_list_list.xml" value="0.3663949275362319" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alert_list_row.xml" value="0.3663949275362319" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_alter_item_list.xml" value="0.3663949275362319" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/fragment_home.xml" value="0.3663949275362319" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/home_fragment.xml" value="0.21875" />
+        <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/layout/phone_contact_row.xml" value="0.20364583333333333" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/menu/bottom_nav_menu.xml" value="0.38697916666666665" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.23489583333333333" />
         <entry key="..\:/Users/z63zh/90018/project-frontend/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.25" />
-
         <entry key="app/src/main/res/drawable/circle.xml" value="0.26197916666666665" />
-
-        <entry key="app/src/main/res/drawable-v24/warning_message.xml" value="0.12135416666666667" />
-        <entry key="app/src/main/res/drawable/circle.xml" value="0.26197916666666665" />
-        <entry key="app/src/main/res/drawable/empty_tall_divider.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
-        <entry key="app/src/main/res/drawable/ic_notifications_black_24dp.xml" value="0.12135416666666667" />
-        <entry key="app/src/main/res/drawable/ic_round_online_prediction_24.xml" value="0.12135416666666667" />
-        <entry key="app/src/main/res/drawable/rounded_message_gray.xml" value="0.12135416666666667" />
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.36423072874577284" />
         <entry key="app/src/main/res/layout/activity_gather_info.xml" value="0.2206664351630589" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25104166666666666" />
-        <entry key="app/src/main/res/layout/activity_settings.xml" value="0.10520833333333333" />
+        <entry key="app/src/main/res/layout/activity_settings.xml" value="0.1453125" />
         <entry key="app/src/main/res/layout/add_contact.xml" value="0.24322916666666666" />
         <entry key="app/src/main/res/layout/add_contact_from_phone.xml" value="0.16927083333333334" />
         <entry key="app/src/main/res/layout/alert_fragment.xml" value="0.24322916666666666" />
-        <entry key="app/src/main/res/layout/contact_fragment.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/contact_fragment.xml" value="0.11820652173913043" />
         <entry key="app/src/main/res/layout/contact_row.xml" value="0.466291917533946" />
-        <entry key="app/src/main/res/layout/fragment_alert_list.xml" value="0.10520833333333333" />
         <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.125" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.125" />
+        <entry key="app/src/main/res/layout/fragment_insert_phone.xml" value="0.17447916666666666" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.125" />
         <entry key="app/src/main/res/layout/home_fragment.xml" value="0.125" />
         <entry key="app/src/main/res/layout/list_item.xml" value="1.3249434968054528" />
-        <entry key="app/src/main/res/layout/message.xml" value="0.3435374149659864" />
+        <entry key="app/src/main/res/layout/message.xml" value="0.3131868131868132" />
+        <entry key="app/src/main/res/layout/new_sign_up.xml" value="0.1" />
         <entry key="app/src/main/res/layout/phone_contact_row.xml" value="1.2146863759443136" />
         <entry key="app/src/main/res/layout/setting_fragment.xml" value="0.25104166666666666" />
-        <entry key="app/src/main/res/layout/signin.xml" value="0.19429347826086957" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.24583333333333332" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1390625" />
         <entry key="app/src/main/res/xml/file_paths.xml" value="0.12864583333333332" />
@@ -62,7 +63,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

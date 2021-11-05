@@ -43,22 +43,9 @@ public class FirestoreUserHelper {
 
 
 
-    private FirestoreUserHelper() {
+    public FirestoreUserHelper() {
         this.userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d(TAG, "FirestoreUserHelper: uid is " + userId);
-    }
-
-    public static FirestoreUserHelper getInstance() {
-        FirestoreUserHelper result = instance;
-        if (result != null) {
-            return result;
-        }
-        synchronized(FirestoreUserHelper.class) {
-            if (instance == null) {
-                instance = new FirestoreUserHelper();
-            }
-            return instance;
-        }
     }
 
 
@@ -192,6 +179,54 @@ public class FirestoreUserHelper {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         return user.getPhoneNumber()==null?"ANONYMOUS":user.getPhoneNumber();
     }
+
+    public void doesUserDocExist(ResultListener callback){
+        Log.d(TAG, "doesUserDocExist: checkinf is user exists with id  " + userId);
+        DocumentReference docRef = db.collection(COLLECTION_USERS).document(userId);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        callback.onTrue();
+                    } else {
+                        Log.d(TAG, "No such document");
+                        callback.onFalse();
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    public void createUserDoc(String phoneNumber){
+        Map<String, Object> user = new HashMap<>();
+        user.put("phoneNumber", phoneNumber);
+
+        db.collection("users").document(userId)
+                .set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+    }
+
+    public interface ResultListener {
+        void onTrue();
+        void onFalse();
+    }
+
 
 
 }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class Alert {
     private String name;
     private Location location;
-    private final FirestoreUserHelper userHelper;
+    private final FirestoreUserHelper userHelper = new FirestoreUserHelper();
 
     private static final String TAG = "Alert";
 
@@ -25,7 +25,6 @@ public class Alert {
         this.location = new Location("latitude,longitude");
         location.setLatitude(latitude);
         location.setLongitude(longitude);
-        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Alert(String name, String latitude, String longitude) {
@@ -33,18 +32,16 @@ public class Alert {
         this.location = new Location("latitude,longitude");
         location.setLatitude(Float.parseFloat(latitude));
         location.setLongitude(Float.parseFloat(longitude));
-        userHelper = FirestoreUserHelper.getInstance();
     }
 
 
     public Alert(String name, Location location) {
         this.name = name;
         this.location = location;
-        userHelper = FirestoreUserHelper.getInstance();
     }
 
     public Alert() {
-        userHelper = FirestoreUserHelper.getInstance();
+
     }
 
     public String getName() {
