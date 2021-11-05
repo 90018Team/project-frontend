@@ -213,7 +213,7 @@ public class HomeFragment extends Fragment {
                         if (isSendMessageText) {
                             txt = defaultMessageText;
                             if (isGeoLocation) {
-                                txt += ", My location is " + gps.getAddress(location);
+                                txt += " My location is " + gps.getAddress(location);
                             }
                         }
                         // else if only location
